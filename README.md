@@ -4,6 +4,12 @@ Rust MCP server for the Yandex DataLens Public API (`https://api.datalens.tech`)
 
 This server uses the MCP `stdio` transport and exposes DataLens RPC methods as MCP tools.
 
+## Disclaimer
+
+- This is an unofficial, community-maintained project and is not affiliated with, sponsored by, or endorsed by Yandex.
+- Yandex and DataLens are trademarks of their respective owners.
+- The name `datalens-mcp` is used only to describe compatibility with the DataLens API.
+
 ## Supported Tools
 
 - Utility:
