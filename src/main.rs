@@ -181,7 +181,7 @@ impl DataLensServer {
             payload.insert("workbookId".to_owned(), Value::String(workbook_id));
         }
         if let Some(rev_id) = args.rev_id {
-            payload.insert("rev_id".to_owned(), Value::String(rev_id));
+            payload.insert("revId".to_owned(), Value::String(rev_id));
         }
         extend_with_extra(&mut payload, args.extra);
 
@@ -405,6 +405,134 @@ fn init_tracing() {
         .with_target(false)
         .compact()
         .init();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{body_json, header, method, path},
+    };
+
+    fn test_config(base_url: String) -> AppConfig {
+        AppConfig {
+            base_url,
+            api_version: "0".to_owned(),
+            org_id: Some("org-123".to_owned()),
+            subject_token: Some("token-abc".to_owned()),
+            timeout: Duration::from_secs(5),
+        }
+    }
+
+    fn test_server(base_url: String) -> DataLensServer {
+        let cfg = test_config(base_url);
+        let http = Client::builder()
+            .timeout(cfg.timeout)
+            .build()
+            .expect("test HTTP client must initialize");
+
+        DataLensServer {
+            tool_router: ToolRouter::new(),
+            http,
+            cfg,
+        }
+    }
+
+    #[test]
+    fn parse_response_data_returns_json_when_valid() {
+        let value = parse_response_data(r#"{"ok":true,"n":1}"#);
+        assert_eq!(value, json!({"ok": true, "n": 1}));
+    }
+
+    #[test]
+    fn truncate_utf8_keeps_char_boundaries() {
+        let input = "abc🙂🙂";
+        let out = truncate_utf8(input, 5);
+        assert!(out.starts_with("abc"));
+        assert!(!out.contains('\u{fffd}'));
+    }
+
+    #[test]
+    fn get_dashboard_args_accept_legacy_include_permissions_info_alias() {
+        let args: GetDashboardArgs = serde_json::from_value(json!({
+            "dashboardId": "dash-1",
+            "includePermissionsInfo": true
+        }))
+        .expect("deserialization must succeed");
+
+        assert_eq!(args.include_permissions, Some(true));
+    }
+
+    #[tokio::test]
+    async fn call_rpc_validates_payload_object() {
+        let server = test_server("http://127.0.0.1".to_owned());
+
+        let err = match server
+            .call_rpc("listDirectory", json!(["not-an-object"]))
+            .await
+        {
+            Ok(_) => panic!("must reject non-object payload"),
+            Err(err) => err,
+        };
+
+        assert_eq!(err.message, "payload must be a JSON object");
+    }
+
+    #[tokio::test]
+    async fn call_rpc_sends_expected_request_shape() {
+        let mock_server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/rpc/listDirectory"))
+            .and(header("x-dl-api-version", "0"))
+            .and(header("x-dl-org-id", "org-123"))
+            .and(header("x-yacloud-subjecttoken", "token-abc"))
+            .and(header("x-dl-auth-token", "OAuth token-abc"))
+            .and(body_json(json!({"path": "/"})))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"entries": []})))
+            .mount(&mock_server)
+            .await;
+
+        let server = test_server(mock_server.uri());
+
+        let response = server
+            .call_rpc("listDirectory", json!({"path": "/"}))
+            .await
+            .expect("request must succeed");
+
+        assert_eq!(response.0, json!({"entries": []}));
+    }
+
+    #[tokio::test]
+    async fn datalens_get_dataset_uses_rev_id_as_rev_id_field() {
+        let mock_server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/rpc/getDataset"))
+            .and(body_json(json!({
+                "datasetId": "ds-1",
+                "workbookId": "wb-1",
+                "revId": "r-1"
+            })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"ok": true})))
+            .mount(&mock_server)
+            .await;
+
+        let server = test_server(mock_server.uri());
+
+        let result = server
+            .datalens_get_dataset(Parameters(GetDatasetArgs {
+                dataset_id: "ds-1".to_owned(),
+                workbook_id: Some("wb-1".to_owned()),
+                rev_id: Some("r-1".to_owned()),
+                extra: BTreeMap::new(),
+            }))
+            .await
+            .expect("tool call must succeed");
+
+        assert_eq!(result.0, json!({"ok": true}));
+    }
 }
 
 #[tokio::main]
