@@ -23,9 +23,12 @@ cargo build --release
 %install
 install -Dm755 target/release/datalens-mcp \
     %{buildroot}%{_bindir}/datalens-mcp
+install -Dm644 man/datalens-mcp.1 \
+    %{buildroot}%{_mandir}/man1/datalens-mcp.1
 
 %files
 %{_bindir}/datalens-mcp
+%{_mandir}/man1/datalens-mcp.1*
 %license LICENSE
 %doc README.md README_ru.md
 

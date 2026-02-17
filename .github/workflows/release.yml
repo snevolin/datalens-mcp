@@ -60,6 +60,8 @@ jobs:
           mkdir -p "$PACKAGE_DIR"
           cp "target/${{ matrix.target }}/release/${{ matrix.binary_name }}" "$PACKAGE_DIR/"
           cp LICENSE README.md README_ru.md "$PACKAGE_DIR/"
+          mkdir -p "$PACKAGE_DIR/man1"
+          cp man/datalens-mcp.1 "$PACKAGE_DIR/man1/"
 
           mkdir -p dist
           if [[ "${{ matrix.archive_ext }}" == "zip" ]]; then

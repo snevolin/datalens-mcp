@@ -1,0 +1,85 @@
+.TH DATALENS-MCP 1 "February 2026" "datalens-mcp 0.1.0" "User Commands"
+.SH NAME
+datalens-mcp \- MCP server for Yandex DataLens Public API
+.SH SYNOPSIS
+.B datalens-mcp
+.SH DESCRIPTION
+.B datalens-mcp
+is a Model Context Protocol (MCP) server implemented in Rust.
+It connects MCP clients to the Yandex DataLens Public API over HTTP and
+serves MCP messages over standard input/output (stdio).
+.PP
+The server does not provide an interactive shell interface.
+It is expected to be started by an MCP client such as Codex or Claude.
+.SH ENVIRONMENT
+.TP
+.B DATALENS_ORG_ID
+Required. DataLens organization ID. Sent as \fBx-dl-org-id\fR.
+.TP
+.B YC_IAM_TOKEN
+Required unless \fBDATALENS_IAM_TOKEN\fR is set.
+IAM token used for DataLens authentication.
+.TP
+.B DATALENS_IAM_TOKEN
+Alternative token variable. If set, it is preferred over \fBYC_IAM_TOKEN\fR.
+.TP
+.B DATALENS_BASE_URL
+Optional. DataLens API base URL.
+Default: \fBhttps://api.datalens.tech\fR.
+.TP
+.B DATALENS_API_VERSION
+Optional. DataLens API version header value.
+Default: \fB0\fR.
+.TP
+.B DATALENS_TIMEOUT_SECONDS
+Optional. HTTP timeout in seconds.
+Default: \fB30\fR.
+.SH MCP CLIENT SETUP
+.PP
+Typical setup with Codex CLI:
+.PP
+.EX
+codex mcp add datalens -- /usr/local/bin/datalens-mcp
+.EE
+.PP
+If explicit environment values are needed:
+.PP
+.EX
+codex mcp add datalens \\
+  --env DATALENS_ORG_ID=<org_id> \\
+  --env YC_IAM_TOKEN=<token> \\
+  -- /usr/local/bin/datalens-mcp
+.EE
+.SH EXAMPLES
+.PP
+Run manually (for diagnostics):
+.PP
+.EX
+export DATALENS_ORG_ID="<org_id>"
+export YC_IAM_TOKEN="<token>"
+datalens-mcp
+.EE
+.SH EXIT STATUS
+.TP
+.B 0
+Normal termination.
+.TP
+.B non-zero
+Startup failure or runtime error.
+.SH FILES
+.TP
+.B ~/.codex/config.toml
+Codex MCP server configuration.
+.TP
+.B %APPDATA%/Claude/claude_desktop_config.json
+Claude Desktop MCP configuration on Windows.
+.TP
+.B ~/Library/Application Support/Claude/claude_desktop_config.json
+Claude Desktop MCP configuration on macOS.
+.SH SECURITY NOTES
+.PP
+Do not hardcode short-lived tokens in permanent configuration.
+Prefer rotating tokens or service-account-based automation for long-running setups.
+.SH SEE ALSO
+.BR README.md ,
+.BR README_ru.md
