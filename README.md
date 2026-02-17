@@ -6,31 +6,48 @@ This server uses the MCP `stdio` transport and exposes DataLens RPC methods as M
 
 ## Supported Tools
 
-- `datalens_list_directory`
-  - Wrapper for `listDirectory`
-- `datalens_get_entries`
-  - Wrapper for `getEntries`
-- `datalens_get_dataset`
-  - Wrapper for `getDataset`
-- `datalens_get_dashboard`
-  - Wrapper for `getDashboard`
-- `datalens_rpc`
-  - Generic RPC tool for any method under `/rpc/{method}`
+- Utility:
+  - `datalens_list_methods`: returns known DataLens API methods, mapped MCP tool names, categories, and snapshot metadata.
+  - `datalens_rpc`: generic fallback for any method under `/rpc/{method}`.
+- Typed wrappers (method-specific):
+  - `datalens_get_connection` -> `getConnection`
+  - `datalens_create_connection` -> `createConnection`
+  - `datalens_update_connection` -> `updateConnection`
+  - `datalens_delete_connection` -> `deleteConnection`
+  - `datalens_get_dashboard` -> `getDashboard`
+  - `datalens_create_dashboard` -> `createDashboard`
+  - `datalens_update_dashboard` -> `updateDashboard`
+  - `datalens_delete_dashboard` -> `deleteDashboard`
+  - `datalens_get_dataset` -> `getDataset`
+  - `datalens_create_dataset` -> `createDataset`
+  - `datalens_update_dataset` -> `updateDataset`
+  - `datalens_delete_dataset` -> `deleteDataset`
+  - `datalens_validate_dataset` -> `validateDataset`
+  - `datalens_get_entries_relations` -> `getEntriesRelations`
+  - `datalens_get_entries` -> `getEntries`
+  - `datalens_get_ql_chart` -> `getQLChart`
+  - `datalens_delete_ql_chart` -> `deleteQLChart`
+  - `datalens_get_wizard_chart` -> `getWizardChart`
+  - `datalens_delete_wizard_chart` -> `deleteWizardChart`
+  - `datalens_get_editor_chart` -> `getEditorChart`
+  - `datalens_delete_editor_chart` -> `deleteEditorChart`
+  - `datalens_create_editor_chart` -> `createEditorChart`
+  - `datalens_update_editor_chart` -> `updateEditorChart`
+  - `datalens_get_entries_permissions` -> `getEntriesPermissions`
+  - `datalens_get_audit_entries_updates` -> `getAuditEntriesUpdates`
+  - `datalens_list_directory` -> `listDirectory`
 
 ## API Coverage (Snapshot)
 
 Coverage snapshot date: **February 17, 2026**.
 
-- Typed wrappers included in this server:
-  - `listDirectory`
-  - `getEntries`
-  - `getDataset`
-  - `getDashboard`
-- Generic reachability:
-  - Any DataLens Public API RPC method can be called through `datalens_rpc` by passing method name and raw JSON payload.
-- Practical meaning:
-  - Read-focused methods are pre-wrapped.
-  - Write/update/delete methods are available through `datalens_rpc`, but are not pre-wrapped as dedicated typed tools yet.
+- Typed coverage:
+  - This server includes typed wrappers for all DataLens methods listed in the API overview snapshot (`/openapi-ref/`) at the time of implementation.
+  - `datalens_list_methods` exposes that same catalog at runtime to MCP agents.
+- Forward compatibility:
+  - `datalens_rpc` can call methods that may appear later in DataLens API before a dedicated wrapper is added.
+- Experimental methods:
+  - Methods marked as experimental in DataLens docs are exposed as tools too. Their behavior can change upstream.
 
 Reference docs used for this snapshot include DataLens API pages updated up to **February 4, 2026** (API start) and method pages updated between **June 26, 2025** and **January 16, 2026**.
 

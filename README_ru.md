@@ -6,31 +6,48 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
 
 ## Поддерживаемые Tools
 
-- `datalens_list_directory`
-  - Обёртка над `listDirectory`
-- `datalens_get_entries`
-  - Обёртка над `getEntries`
-- `datalens_get_dataset`
-  - Обёртка над `getDataset`
-- `datalens_get_dashboard`
-  - Обёртка над `getDashboard`
-- `datalens_rpc`
-  - Универсальный RPC tool для любого метода по пути `/rpc/{method}`
+- Служебные:
+  - `datalens_list_methods`: возвращает известные методы DataLens API, соответствующие MCP tools, категории и метаданные снимка.
+  - `datalens_rpc`: универсальный fallback для любого метода по пути `/rpc/{method}`.
+- Типизированные обёртки (method-specific):
+  - `datalens_get_connection` -> `getConnection`
+  - `datalens_create_connection` -> `createConnection`
+  - `datalens_update_connection` -> `updateConnection`
+  - `datalens_delete_connection` -> `deleteConnection`
+  - `datalens_get_dashboard` -> `getDashboard`
+  - `datalens_create_dashboard` -> `createDashboard`
+  - `datalens_update_dashboard` -> `updateDashboard`
+  - `datalens_delete_dashboard` -> `deleteDashboard`
+  - `datalens_get_dataset` -> `getDataset`
+  - `datalens_create_dataset` -> `createDataset`
+  - `datalens_update_dataset` -> `updateDataset`
+  - `datalens_delete_dataset` -> `deleteDataset`
+  - `datalens_validate_dataset` -> `validateDataset`
+  - `datalens_get_entries_relations` -> `getEntriesRelations`
+  - `datalens_get_entries` -> `getEntries`
+  - `datalens_get_ql_chart` -> `getQLChart`
+  - `datalens_delete_ql_chart` -> `deleteQLChart`
+  - `datalens_get_wizard_chart` -> `getWizardChart`
+  - `datalens_delete_wizard_chart` -> `deleteWizardChart`
+  - `datalens_get_editor_chart` -> `getEditorChart`
+  - `datalens_delete_editor_chart` -> `deleteEditorChart`
+  - `datalens_create_editor_chart` -> `createEditorChart`
+  - `datalens_update_editor_chart` -> `updateEditorChart`
+  - `datalens_get_entries_permissions` -> `getEntriesPermissions`
+  - `datalens_get_audit_entries_updates` -> `getAuditEntriesUpdates`
+  - `datalens_list_directory` -> `listDirectory`
 
 ## Покрытие API (Снимок)
 
 Дата снимка покрытия: **17 февраля 2026**.
 
-- Типизированные обёртки, включённые в сервер:
-  - `listDirectory`
-  - `getEntries`
-  - `getDataset`
-  - `getDashboard`
-- Универсальная достижимость:
-  - Любой RPC-метод Public API DataLens можно вызвать через `datalens_rpc`, передав имя метода и raw JSON payload.
-- Практический смысл:
-  - Read-ориентированные методы уже имеют отдельные tools.
-  - Методы create/update/delete доступны через `datalens_rpc`, но пока без отдельных типизированных tools.
+- Типизированное покрытие:
+  - Сервер содержит типизированные обёртки для всех методов DataLens из snapshot API overview (`/openapi-ref/`) на момент реализации.
+  - `datalens_list_methods` отдаёт этот же каталог во время работы MCP-сервера.
+- Forward compatibility:
+  - `datalens_rpc` может вызывать методы, которые появятся позже в DataLens API до добавления отдельной обёртки.
+- Экспериментальные методы:
+  - Методы, отмеченные в документации DataLens как experimental, также доступны как tools. Их поведение может измениться upstream.
 
 Для этого снимка использованы страницы документации DataLens API, обновлённые до **4 февраля 2026** (старт API), и страницы методов, обновлённые в период **26 июня 2025** — **16 января 2026**.
 

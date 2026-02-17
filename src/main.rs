@@ -23,6 +23,175 @@ use tracing_subscriber::EnvFilter;
 const DEFAULT_BASE_URL: &str = "https://api.datalens.tech";
 const DEFAULT_API_VERSION: &str = "0";
 const DEFAULT_TIMEOUT_SECONDS: u64 = 30;
+const METHOD_CATALOG_SNAPSHOT_DATE: &str = "2026-01-16";
+const METHOD_CATALOG_SOURCE_URL: &str = "https://yandex.cloud/en/docs/datalens/openapi-ref/";
+
+#[derive(Clone, Copy)]
+struct MethodCatalogItem {
+    method: &'static str,
+    tool: &'static str,
+    category: &'static str,
+    experimental: bool,
+}
+
+const METHOD_CATALOG: &[MethodCatalogItem] = &[
+    MethodCatalogItem {
+        method: "getConnection",
+        tool: "datalens_get_connection",
+        category: "read",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "createConnection",
+        tool: "datalens_create_connection",
+        category: "write",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "updateConnection",
+        tool: "datalens_update_connection",
+        category: "write",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "deleteConnection",
+        tool: "datalens_delete_connection",
+        category: "write",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "getDashboard",
+        tool: "datalens_get_dashboard",
+        category: "read",
+        experimental: true,
+    },
+    MethodCatalogItem {
+        method: "createDashboard",
+        tool: "datalens_create_dashboard",
+        category: "write",
+        experimental: true,
+    },
+    MethodCatalogItem {
+        method: "updateDashboard",
+        tool: "datalens_update_dashboard",
+        category: "write",
+        experimental: true,
+    },
+    MethodCatalogItem {
+        method: "deleteDashboard",
+        tool: "datalens_delete_dashboard",
+        category: "write",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "getDataset",
+        tool: "datalens_get_dataset",
+        category: "read",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "createDataset",
+        tool: "datalens_create_dataset",
+        category: "write",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "updateDataset",
+        tool: "datalens_update_dataset",
+        category: "write",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "deleteDataset",
+        tool: "datalens_delete_dataset",
+        category: "write",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "validateDataset",
+        tool: "datalens_validate_dataset",
+        category: "write",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "getEntriesRelations",
+        tool: "datalens_get_entries_relations",
+        category: "read",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "getEntries",
+        tool: "datalens_get_entries",
+        category: "read",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "getQLChart",
+        tool: "datalens_get_ql_chart",
+        category: "read",
+        experimental: true,
+    },
+    MethodCatalogItem {
+        method: "deleteQLChart",
+        tool: "datalens_delete_ql_chart",
+        category: "write",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "getWizardChart",
+        tool: "datalens_get_wizard_chart",
+        category: "read",
+        experimental: true,
+    },
+    MethodCatalogItem {
+        method: "deleteWizardChart",
+        tool: "datalens_delete_wizard_chart",
+        category: "write",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "getEditorChart",
+        tool: "datalens_get_editor_chart",
+        category: "read",
+        experimental: true,
+    },
+    MethodCatalogItem {
+        method: "deleteEditorChart",
+        tool: "datalens_delete_editor_chart",
+        category: "write",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "createEditorChart",
+        tool: "datalens_create_editor_chart",
+        category: "write",
+        experimental: true,
+    },
+    MethodCatalogItem {
+        method: "updateEditorChart",
+        tool: "datalens_update_editor_chart",
+        category: "write",
+        experimental: true,
+    },
+    MethodCatalogItem {
+        method: "getEntriesPermissions",
+        tool: "datalens_get_entries_permissions",
+        category: "read",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "getAuditEntriesUpdates",
+        tool: "datalens_get_audit_entries_updates",
+        category: "read",
+        experimental: false,
+    },
+    MethodCatalogItem {
+        method: "listDirectory",
+        tool: "datalens_list_directory",
+        category: "read",
+        experimental: false,
+    },
+];
 
 #[derive(Clone, Debug)]
 struct AppConfig {
@@ -74,7 +243,7 @@ struct ListDirectoryArgs {
 }
 
 #[derive(Debug, Default, Deserialize, schemars::JsonSchema)]
-struct GetEntriesArgs {
+struct RpcPayloadArgs {
     #[serde(flatten)]
     payload: BTreeMap<String, Value>,
 }
@@ -113,6 +282,22 @@ struct GetDashboardArgs {
     extra: BTreeMap<String, Value>,
 }
 
+#[derive(Debug, Default, Deserialize, schemars::JsonSchema)]
+struct NoArgs {}
+
+macro_rules! rpc_payload_tool {
+    ($fn_name:ident, $tool_name:literal, $method_name:literal, $description:literal) => {
+        #[tool(name = $tool_name, description = $description)]
+        async fn $fn_name(
+            &self,
+            Parameters(args): Parameters<RpcPayloadArgs>,
+        ) -> Result<Json<Value>, McpError> {
+            let payload = Value::Object(args.payload.into_iter().collect());
+            self.call_rpc($method_name, payload).await
+        }
+    };
+}
+
 #[tool_router]
 impl DataLensServer {
     fn new(cfg: AppConfig) -> Result<Self> {
@@ -140,6 +325,35 @@ impl DataLensServer {
     }
 
     #[tool(
+        name = "datalens_list_methods",
+        description = "List DataLens API methods known to this server, with MCP tool names and method categories."
+    )]
+    async fn datalens_list_methods(
+        &self,
+        Parameters(_args): Parameters<NoArgs>,
+    ) -> Result<Json<Value>, McpError> {
+        let methods = METHOD_CATALOG
+            .iter()
+            .map(|item| {
+                json!({
+                    "method": item.method,
+                    "mcpTool": item.tool,
+                    "category": item.category,
+                    "experimental": item.experimental,
+                })
+            })
+            .collect::<Vec<_>>();
+
+        Ok(Json(json!({
+            "snapshotDate": METHOD_CATALOG_SNAPSHOT_DATE,
+            "sourceUrl": METHOD_CATALOG_SOURCE_URL,
+            "totalMethods": methods.len(),
+            "genericTool": "datalens_rpc",
+            "methods": methods,
+        })))
+    }
+
+    #[tool(
         name = "datalens_list_directory",
         description = "Call listDirectory. By default, lists the root path '/'."
     )]
@@ -160,7 +374,7 @@ impl DataLensServer {
     )]
     async fn datalens_get_entries(
         &self,
-        Parameters(args): Parameters<GetEntriesArgs>,
+        Parameters(args): Parameters<RpcPayloadArgs>,
     ) -> Result<Json<Value>, McpError> {
         let payload = Value::Object(args.payload.into_iter().collect());
         self.call_rpc("getEntries", payload).await
@@ -221,6 +435,160 @@ impl DataLensServer {
 
         self.call_rpc("getDashboard", Value::Object(payload)).await
     }
+
+    rpc_payload_tool!(
+        datalens_get_connection,
+        "datalens_get_connection",
+        "getConnection",
+        "Call getConnection. Pass DataLens getConnection request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_create_connection,
+        "datalens_create_connection",
+        "createConnection",
+        "Call createConnection. Pass DataLens createConnection request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_update_connection,
+        "datalens_update_connection",
+        "updateConnection",
+        "Call updateConnection. Pass DataLens updateConnection request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_delete_connection,
+        "datalens_delete_connection",
+        "deleteConnection",
+        "Call deleteConnection. Pass DataLens deleteConnection request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_create_dashboard,
+        "datalens_create_dashboard",
+        "createDashboard",
+        "Call createDashboard. Pass DataLens createDashboard request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_update_dashboard,
+        "datalens_update_dashboard",
+        "updateDashboard",
+        "Call updateDashboard. Pass DataLens updateDashboard request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_delete_dashboard,
+        "datalens_delete_dashboard",
+        "deleteDashboard",
+        "Call deleteDashboard. Pass DataLens deleteDashboard request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_create_dataset,
+        "datalens_create_dataset",
+        "createDataset",
+        "Call createDataset. Pass DataLens createDataset request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_update_dataset,
+        "datalens_update_dataset",
+        "updateDataset",
+        "Call updateDataset. Pass DataLens updateDataset request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_delete_dataset,
+        "datalens_delete_dataset",
+        "deleteDataset",
+        "Call deleteDataset. Pass DataLens deleteDataset request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_validate_dataset,
+        "datalens_validate_dataset",
+        "validateDataset",
+        "Call validateDataset. Pass DataLens validateDataset request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_get_entries_relations,
+        "datalens_get_entries_relations",
+        "getEntriesRelations",
+        "Call getEntriesRelations. Pass DataLens getEntriesRelations request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_get_ql_chart,
+        "datalens_get_ql_chart",
+        "getQLChart",
+        "Call getQLChart. Pass DataLens getQLChart request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_delete_ql_chart,
+        "datalens_delete_ql_chart",
+        "deleteQLChart",
+        "Call deleteQLChart. Pass DataLens deleteQLChart request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_get_wizard_chart,
+        "datalens_get_wizard_chart",
+        "getWizardChart",
+        "Call getWizardChart. Pass DataLens getWizardChart request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_delete_wizard_chart,
+        "datalens_delete_wizard_chart",
+        "deleteWizardChart",
+        "Call deleteWizardChart. Pass DataLens deleteWizardChart request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_get_editor_chart,
+        "datalens_get_editor_chart",
+        "getEditorChart",
+        "Call getEditorChart. Pass DataLens getEditorChart request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_delete_editor_chart,
+        "datalens_delete_editor_chart",
+        "deleteEditorChart",
+        "Call deleteEditorChart. Pass DataLens deleteEditorChart request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_create_editor_chart,
+        "datalens_create_editor_chart",
+        "createEditorChart",
+        "Call createEditorChart. Pass DataLens createEditorChart request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_update_editor_chart,
+        "datalens_update_editor_chart",
+        "updateEditorChart",
+        "Call updateEditorChart. Pass DataLens updateEditorChart request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_get_entries_permissions,
+        "datalens_get_entries_permissions",
+        "getEntriesPermissions",
+        "Call getEntriesPermissions. Pass DataLens getEntriesPermissions request fields."
+    );
+
+    rpc_payload_tool!(
+        datalens_get_audit_entries_updates,
+        "datalens_get_audit_entries_updates",
+        "getAuditEntriesUpdates",
+        "Call getAuditEntriesUpdates. Pass DataLens getAuditEntriesUpdates request fields."
+    );
 }
 
 #[tool_handler(router = self.tool_router)]
@@ -228,7 +596,7 @@ impl ServerHandler for DataLensServer {
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
             instructions: Some(
-                "Yandex DataLens MCP server. Configure DATALENS_ORG_ID and YC_IAM_TOKEN (or DATALENS_IAM_TOKEN) before calling tools."
+                "Yandex DataLens MCP server. Configure DATALENS_ORG_ID and YC_IAM_TOKEN (or DATALENS_IAM_TOKEN) before calling tools. Use datalens_list_methods to discover typed tools and API methods."
                     .to_owned(),
             ),
             capabilities: ServerCapabilities::builder().enable_tools().build(),
@@ -465,6 +833,32 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn datalens_list_methods_includes_write_methods() {
+        let server = test_server("http://127.0.0.1".to_owned());
+
+        let response = server
+            .datalens_list_methods(Parameters(NoArgs::default()))
+            .await
+            .expect("list methods must succeed");
+
+        let methods = response
+            .0
+            .get("methods")
+            .and_then(Value::as_array)
+            .expect("methods must be an array");
+
+        assert!(
+            methods.iter().any(|method| {
+                method.get("method") == Some(&Value::String("createDataset".to_owned()))
+                    && method.get("mcpTool")
+                        == Some(&Value::String("datalens_create_dataset".to_owned()))
+                    && method.get("category") == Some(&Value::String("write".to_owned()))
+            }),
+            "method catalog must include createDataset write wrapper"
+        );
+    }
+
+    #[tokio::test]
     async fn call_rpc_validates_payload_object() {
         let server = test_server("http://127.0.0.1".to_owned());
 
@@ -532,6 +926,33 @@ mod tests {
             .expect("tool call must succeed");
 
         assert_eq!(result.0, json!({"ok": true}));
+    }
+
+    #[tokio::test]
+    async fn datalens_create_dataset_calls_create_dataset_rpc_method() {
+        let mock_server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/rpc/createDataset"))
+            .and(body_json(json!({
+                "name": "my-dataset",
+                "workbookId": "wb-1"
+            })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"datasetId": "ds-1"})))
+            .mount(&mock_server)
+            .await;
+
+        let server = test_server(mock_server.uri());
+        let mut payload = BTreeMap::new();
+        payload.insert("name".to_owned(), Value::String("my-dataset".to_owned()));
+        payload.insert("workbookId".to_owned(), Value::String("wb-1".to_owned()));
+
+        let result = server
+            .datalens_create_dataset(Parameters(RpcPayloadArgs { payload }))
+            .await
+            .expect("tool call must succeed");
+
+        assert_eq!(result.0, json!({"datasetId": "ds-1"}));
     }
 }
 
