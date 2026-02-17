@@ -1,0 +1,29 @@
+[package]
+name = "datalens-mcp"
+version = "0.1.0"
+edition = "2024"
+description = "MCP server for Yandex DataLens API"
+authors = ["Stanislav Nevolin <stanislav@nevolin.info>"]
+license = "Apache-2.0"
+repository = "https://github.com/snevolin/datalens-mcp"
+
+[package.metadata.wix]
+upgrade-guid = "D6BA1CFD-0C6B-4B7F-A8D9-1E901D7B4F77"
+path-guid = "A44A0ED4-1F6F-40E2-BE0D-62B3D7D35E30"
+license = false
+eula = false
+
+[dependencies]
+anyhow = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+rmcp = { version = "0.16.0", features = ["transport-io"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+schemars = "1"
+
+[profile.dist]
+inherits = "release"
+lto = "thin"

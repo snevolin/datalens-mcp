@@ -1,0 +1,167 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-archives:
+    name: Build archives (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive_ext: tar.gz
+            binary_name: datalens-mcp
+          - os: macos-14
+            target: aarch64-apple-darwin
+            archive_ext: tar.gz
+            binary_name: datalens-mcp
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive_ext: zip
+            binary_name: datalens-mcp.exe
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Restore cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Package artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [[ -z "$VERSION" || "$VERSION" == "$GITHUB_REF_NAME" ]]; then
+            VERSION="dev"
+          fi
+
+          PACKAGE_DIR="target/package-${{ matrix.target }}"
+          ARCHIVE_NAME="datalens-mcp-${VERSION}-${{ matrix.target }}.${{ matrix.archive_ext }}"
+
+          mkdir -p "$PACKAGE_DIR"
+          cp "target/${{ matrix.target }}/release/${{ matrix.binary_name }}" "$PACKAGE_DIR/"
+          cp LICENSE README.md README_ru.md "$PACKAGE_DIR/"
+
+          mkdir -p dist
+          if [[ "${{ matrix.archive_ext }}" == "zip" ]]; then
+            (cd "$PACKAGE_DIR" && 7z a "$GITHUB_WORKSPACE/dist/${ARCHIVE_NAME}" .)
+          else
+            tar -C "$PACKAGE_DIR" -czf "dist/${ARCHIVE_NAME}" .
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: archive-${{ matrix.target }}
+          path: dist/*
+
+  windows-msi:
+    name: Build MSI (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Restore cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install WiX toolset
+        shell: powershell
+        run: |
+          choco install wixtoolset --no-progress -y
+          Add-Content $env:GITHUB_PATH 'C:\Program Files (x86)\WiX Toolset v3.11\bin'
+
+      - name: Install cargo-wix
+        run: cargo install cargo-wix --locked
+
+      - name: Build MSI
+        run: cargo wix --output target\wix\datalens-mcp.msi
+
+      - name: Upload MSI
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-msi
+          path: target/wix/*.msi
+
+  fedora-rpm:
+    name: Build RPM (Fedora)
+    runs-on: ubuntu-latest
+    container: fedora:41
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          dnf -y update
+          dnf -y install rust cargo rpm-build git
+
+      - name: Build RPM
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION=$(grep -m1 '^version = ' Cargo.toml | sed -E 's/version = "([^"]+)"/\1/')
+          TOPDIR="$(pwd)/rpmbuild"
+
+          mkdir -p "$TOPDIR"/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          git archive --format=tar.gz \
+            --prefix="datalens-mcp-${VERSION}/" \
+            -o "$TOPDIR/SOURCES/datalens-mcp-${VERSION}.tar.gz" \
+            HEAD
+
+          cp datalens-mcp.spec "$TOPDIR/SPECS/"
+
+          rpmbuild -ba "$TOPDIR/SPECS/datalens-mcp.spec" \
+            --define "_topdir $TOPDIR"
+
+      - name: Upload RPM
+        uses: actions/upload-artifact@v4
+        with:
+          name: fedora-rpm
+          path: |
+            rpmbuild/RPMS/**/*.rpm
+            rpmbuild/SRPMS/**/*.rpm
+
+  github-release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs:
+      - build-archives
+      - windows-msi
+      - fedora-rpm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/**/*.tar.gz
+            dist/**/*.zip
+            dist/**/*.msi
+            dist/**/*.rpm
