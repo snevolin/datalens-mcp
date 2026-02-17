@@ -6,7 +6,7 @@ TOPDIR ?= $(CURDIR)/rpmbuild
 SPEC := $(PACKAGE).spec
 SOURCE_ARCHIVE := $(TOPDIR)/SOURCES/$(PACKAGE)-$(VERSION).tar.gz
 
-.PHONY: help build run check test fmt fmt-check clippy clean rpm rpm-source rpm-clean
+.PHONY: help build run check test fmt fmt-check clippy clean deb rpm rpm-source rpm-clean
 
 help:
 	@echo "Targets:"
@@ -18,6 +18,7 @@ help:
 	@echo "  fmt-check   Verify formatting"
 	@echo "  clippy      Run clippy with warnings denied"
 	@echo "  clean       Remove cargo build artifacts"
+	@echo "  deb         Build Debian package (.deb) into target/debian"
 	@echo "  rpm         Build RPM + SRPM into $(TOPDIR)"
 	@echo "  rpm-source  Prepare rpmbuild tree and source archive only"
 	@echo "  rpm-clean   Remove $(TOPDIR)"
@@ -53,6 +54,13 @@ clippy:
 clean:
 	@command -v cargo >/dev/null 2>&1 || { echo "cargo is required"; exit 1; }
 	cargo clean
+
+deb:
+	@command -v cargo >/dev/null 2>&1 || { echo "cargo is required"; exit 1; }
+	@cargo deb --help >/dev/null 2>&1 || { echo "cargo-deb is required (install cargo-deb: cargo install cargo-deb --locked)"; exit 1; }
+	cargo deb
+	@echo "Built DEBs:"
+	@find target/debian -type f -name '*.deb' -print
 
 rpm-source:
 	@command -v git >/dev/null 2>&1 || { echo "git is required"; exit 1; }

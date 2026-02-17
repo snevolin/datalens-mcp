@@ -152,6 +152,29 @@ export DATALENS_ORG_ID="<your_org_id>"
 export YC_IAM_TOKEN="$(yc iam create-token)"
 ```
 
+### Debian/Ubuntu Linux (DEB)
+
+1. Download `.deb` from the release page.
+2. Install:
+
+```bash
+sudo apt install ./datalens-mcp_*_amd64.deb
+```
+
+3. Verify binary and man page:
+
+```bash
+which datalens-mcp
+man datalens-mcp
+```
+
+4. Configure credentials for this platform:
+
+```bash
+export DATALENS_ORG_ID="<your_org_id>"
+export YC_IAM_TOKEN="$(yc iam create-token)"
+```
+
 ### macOS (Apple Silicon, aarch64 tar.gz)
 
 1. Download the macOS archive from the latest release.

@@ -152,6 +152,29 @@ export DATALENS_ORG_ID="<your_org_id>"
 export YC_IAM_TOKEN="$(yc iam create-token)"
 ```
 
+### Debian/Ubuntu Linux (DEB)
+
+1. Скачайте `.deb` со страницы релиза.
+2. Установите:
+
+```bash
+sudo apt install ./datalens-mcp_*_amd64.deb
+```
+
+3. Проверьте бинарник и man-страницу:
+
+```bash
+which datalens-mcp
+man datalens-mcp
+```
+
+4. Настройте ключи для этой платформы:
+
+```bash
+export DATALENS_ORG_ID="<your_org_id>"
+export YC_IAM_TOKEN="$(yc iam create-token)"
+```
+
 ### macOS (Apple Silicon, aarch64 tar.gz)
 
 1. Скачайте macOS-архив из последнего релиза.

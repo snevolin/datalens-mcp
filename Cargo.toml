@@ -13,6 +13,17 @@ path-guid = "A44A0ED4-1F6F-40E2-BE0D-62B3D7D35E30"
 license = false
 eula = false
 
+[package.metadata.deb]
+depends = "$auto"
+section = "utils"
+priority = "optional"
+assets = [
+  ["target/release/datalens-mcp", "usr/bin/datalens-mcp", "755"],
+  ["README.md", "usr/share/doc/datalens-mcp/README.md", "644"],
+  ["README_ru.md", "usr/share/doc/datalens-mcp/README_ru.md", "644"],
+  ["man/datalens-mcp.1", "usr/share/man/man1/datalens-mcp.1", "644"],
+]
+
 [dependencies]
 anyhow = "1"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }

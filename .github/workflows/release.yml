@@ -145,6 +145,30 @@ jobs:
             rpmbuild/RPMS/**/*.rpm
             rpmbuild/SRPMS/**/*.rpm
 
+  debian-deb:
+    name: Build DEB (Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Restore cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-deb
+        run: cargo install cargo-deb --locked
+
+      - name: Build DEB
+        run: cargo deb
+
+      - name: Upload DEB
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian-deb
+          path: target/debian/*.deb
+
   github-release:
     name: Publish GitHub Release
     if: startsWith(github.ref, 'refs/tags/v')
@@ -152,6 +176,7 @@ jobs:
       - build-archives
       - windows-msi
       - fedora-rpm
+      - debian-deb
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
@@ -167,3 +192,4 @@ jobs:
             dist/**/*.zip
             dist/**/*.msi
             dist/**/*.rpm
+            dist/**/*.deb
