@@ -47,6 +47,10 @@ struct MethodRegistryItem {
     summary: Option<String>,
     description: Option<String>,
     request_schema: Value,
+    #[serde(default)]
+    request_example: Option<Value>,
+    #[serde(default)]
+    response_example: Option<Value>,
 }
 
 static METHOD_REGISTRY: OnceLock<MethodRegistry> = OnceLock::new();
@@ -406,6 +410,8 @@ impl DataLensServer {
             "summary": method.summary,
             "description": method.description,
             "requestSchema": method.request_schema,
+            "requestExample": method.request_example,
+            "responseExample": method.response_example,
         });
         let response = response.as_object().cloned().ok_or_else(|| {
             McpError::internal_error("failed to build method schema response object", None)

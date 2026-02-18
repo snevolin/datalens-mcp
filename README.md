@@ -34,7 +34,7 @@ Where to start with `datalens-mcp`:
 
 - Utility:
   - `datalens_list_methods`: returns the full DataLens RPC method catalog (currently 60 methods), mapped MCP tool names, categories, and snapshot metadata.
-  - `datalens_get_method_schema`: returns request schema and invocation hints for one catalog method.
+  - `datalens_get_method_schema`: returns request schema, invocation hints, and embedded static `requestExample` / `responseExample` values from the bundled OpenAPI snapshot.
   - `datalens_rpc`: generic fallback for any method under `/rpc/{method}`.
 - Typed wrappers (core high-frequency methods):
   - `datalens_get_connection` -> `getConnection`
@@ -58,7 +58,7 @@ Coverage snapshot date: **February 18, 2026**.
 
 - Full method catalog:
   - `datalens_list_methods` exposes the full RPC catalog from the OpenAPI snapshot (`60` methods at this date).
-  - `datalens_get_method_schema` returns request schema and invocation metadata for each method.
+  - `datalens_get_method_schema` returns request schema, invocation metadata, and static examples from the embedded snapshot.
 - Typed coverage policy:
   - This server keeps typed wrappers for core high-frequency operations only.
   - This is intentional: it keeps MCP `tools/list` smaller and saves model context window.

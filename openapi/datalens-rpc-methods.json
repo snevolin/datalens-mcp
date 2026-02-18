@@ -35,6 +35,22 @@
           "title",
           "parentId"
         ]
+      },
+      "requestExample": {
+        "title": "string",
+        "parentId": "string"
+      },
+      "responseExample": {
+        "collectionId": "string",
+        "title": "string",
+        "description": "string",
+        "parentId": "string",
+        "tenantId": "string",
+        "createdBy": "string",
+        "createdAt": "string",
+        "updatedBy": "string",
+        "updatedAt": "string",
+        "meta": {}
       }
     },
     {
@@ -54,6 +70,25 @@
         },
         "required": [
           "collectionId"
+        ]
+      },
+      "requestExample": {
+        "collectionId": "string"
+      },
+      "responseExample": {
+        "collections": [
+          {
+            "collectionId": "string",
+            "title": "string",
+            "description": "string",
+            "parentId": "string",
+            "tenantId": "string",
+            "createdBy": "string",
+            "createdAt": "string",
+            "updatedBy": "string",
+            "updatedAt": "string",
+            "meta": {}
+          }
         ]
       }
     },
@@ -78,6 +113,27 @@
         "required": [
           "collectionIds"
         ]
+      },
+      "requestExample": {
+        "collectionIds": [
+          "string"
+        ]
+      },
+      "responseExample": {
+        "collections": [
+          {
+            "collectionId": "string",
+            "title": "string",
+            "description": "string",
+            "parentId": "string",
+            "tenantId": "string",
+            "createdBy": "string",
+            "createdAt": "string",
+            "updatedBy": "string",
+            "updatedAt": "string",
+            "meta": {}
+          }
+        ]
       }
     },
     {
@@ -101,7 +157,24 @@
         "required": [
           "collectionId"
         ]
-      }
+      },
+      "requestExample": {
+        "collectionId": "string"
+      },
+      "responseExample": [
+        {
+          "collectionId": "string",
+          "title": "string",
+          "description": "string",
+          "parentId": "string",
+          "tenantId": "string",
+          "createdBy": "string",
+          "createdAt": "string",
+          "updatedBy": "string",
+          "updatedAt": "string",
+          "meta": {}
+        }
+      ]
     },
     {
       "method": "getCollection",
@@ -124,6 +197,21 @@
         "required": [
           "collectionId"
         ]
+      },
+      "requestExample": {
+        "collectionId": "string"
+      },
+      "responseExample": {
+        "collectionId": "string",
+        "title": "string",
+        "description": "string",
+        "parentId": "string",
+        "tenantId": "string",
+        "createdBy": "string",
+        "createdAt": "string",
+        "updatedBy": "string",
+        "updatedAt": "string",
+        "meta": {}
       }
     },
     {
@@ -188,6 +276,26 @@
         "required": [
           "collectionId"
         ]
+      },
+      "requestExample": {
+        "collectionId": "string"
+      },
+      "responseExample": {
+        "items": [
+          {
+            "collectionId": "string",
+            "title": "string",
+            "description": "string",
+            "parentId": "string",
+            "tenantId": "string",
+            "createdBy": "string",
+            "createdAt": "string",
+            "updatedBy": "string",
+            "updatedAt": "string",
+            "meta": {},
+            "entity": "collection"
+          }
+        ]
       }
     },
     {
@@ -200,6 +308,11 @@
       "description": null,
       "requestSchema": {
         "type": "object"
+      },
+      "requestExample": {},
+      "responseExample": {
+        "createCollectionInRoot": true,
+        "createWorkbookInRoot": true
       }
     },
     {
@@ -230,6 +343,22 @@
           "collectionId",
           "parentId"
         ]
+      },
+      "requestExample": {
+        "collectionId": "string",
+        "parentId": "string"
+      },
+      "responseExample": {
+        "collectionId": "string",
+        "title": "string",
+        "description": "string",
+        "parentId": "string",
+        "tenantId": "string",
+        "createdBy": "string",
+        "createdAt": "string",
+        "updatedBy": "string",
+        "updatedAt": "string",
+        "meta": {}
       }
     },
     {
@@ -260,6 +389,28 @@
           "collectionIds",
           "parentId"
         ]
+      },
+      "requestExample": {
+        "collectionIds": [
+          "string"
+        ],
+        "parentId": "string"
+      },
+      "responseExample": {
+        "collections": [
+          {
+            "collectionId": "string",
+            "title": "string",
+            "description": "string",
+            "parentId": "string",
+            "tenantId": "string",
+            "createdBy": "string",
+            "createdAt": "string",
+            "updatedBy": "string",
+            "updatedAt": "string",
+            "meta": {}
+          }
+        ]
       }
     },
     {
@@ -286,6 +437,21 @@
         "required": [
           "collectionId"
         ]
+      },
+      "requestExample": {
+        "collectionId": "string"
+      },
+      "responseExample": {
+        "collectionId": "string",
+        "title": "string",
+        "description": "string",
+        "parentId": "string",
+        "tenantId": "string",
+        "createdBy": "string",
+        "createdAt": "string",
+        "updatedBy": "string",
+        "updatedAt": "string",
+        "meta": {}
       }
     },
     {
@@ -322,6 +488,14 @@
           "connectionId"
         ],
         "additionalProperties": false
+      },
+      "requestExample": {
+        "connectionId": "string"
+      },
+      "responseExample": {
+        "counter_id": "string",
+        "name": "string",
+        "token": "string"
       }
     },
     {
@@ -334,6 +508,15 @@
       "description": null,
       "requestSchema": {
         "$ref": "#/components/schemas/ConnectionCreate"
+      },
+      "requestExample": {
+        "counter_id": "string",
+        "name": "string",
+        "token": "string",
+        "dir_path": "string"
+      },
+      "responseExample": {
+        "id": "string"
       }
     },
     {
@@ -358,6 +541,14 @@
           "connectionId"
         ],
         "additionalProperties": false
+      },
+      "requestExample": {
+        "connectionId": "string"
+      },
+      "responseExample": {
+        "counter_id": "string",
+        "name": "string",
+        "token": "string"
       }
     },
     {
@@ -379,7 +570,11 @@
           "connectionId"
         ],
         "additionalProperties": false
-      }
+      },
+      "requestExample": {
+        "connectionId": "string"
+      },
+      "responseExample": null
     },
     {
       "method": "getDashboard",
@@ -391,6 +586,82 @@
       "description": null,
       "requestSchema": {
         "$ref": "#/components/schemas/GetDashboardArgs"
+      },
+      "requestExample": {
+        "dashboardId": "string"
+      },
+      "responseExample": {
+        "entry": {
+          "createdAt": "string",
+          "createdBy": "string",
+          "data": {
+            "counter": 1,
+            "salt": "string",
+            "schemeVersion": 8,
+            "tabs": [
+              {
+                "id": "string",
+                "title": "string",
+                "items": [
+                  {
+                    "id": "string",
+                    "namespace": "default",
+                    "type": "title",
+                    "data": {
+                      "text": "string"
+                    }
+                  }
+                ],
+                "layout": [
+                  {
+                    "i": "string",
+                    "h": 1,
+                    "w": 1,
+                    "x": 1,
+                    "y": 1
+                  }
+                ],
+                "connections": [
+                  {
+                    "from": "string",
+                    "to": "string",
+                    "kind": "ignore"
+                  }
+                ],
+                "aliases": {
+                  "default": [
+                    [
+                      "string"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "settings": {
+              "autoupdateInterval": 30,
+              "maxConcurrentRequests": 1,
+              "silentLoading": true,
+              "dependentSelectors": true,
+              "hideTabs": true,
+              "expandTOC": true
+            }
+          },
+          "entryId": "string",
+          "hidden": true,
+          "key": "string",
+          "meta": {},
+          "public": true,
+          "publishedId": "string",
+          "revId": "string",
+          "savedId": "string",
+          "scope": "dash",
+          "tenantId": "string",
+          "type": "",
+          "updatedAt": "string",
+          "updatedBy": "string",
+          "version": 1,
+          "workbookId": "string"
+        }
       }
     },
     {
@@ -1803,6 +2074,139 @@
           "mode"
         ],
         "additionalProperties": false
+      },
+      "requestExample": {
+        "entry": {
+          "data": {
+            "counter": 1,
+            "salt": "string",
+            "tabs": [
+              {
+                "id": "string",
+                "title": "string",
+                "items": [
+                  {
+                    "id": "string",
+                    "namespace": "default",
+                    "type": "title",
+                    "data": {
+                      "text": "string"
+                    }
+                  }
+                ],
+                "layout": [
+                  {
+                    "i": "string",
+                    "h": 1,
+                    "w": 1,
+                    "x": 1,
+                    "y": 1
+                  }
+                ],
+                "connections": [
+                  {
+                    "from": "string",
+                    "to": "string",
+                    "kind": "ignore"
+                  }
+                ],
+                "aliases": {
+                  "default": [
+                    [
+                      "string"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "settings": {
+              "autoupdateInterval": 30,
+              "maxConcurrentRequests": 1,
+              "silentLoading": true,
+              "dependentSelectors": true,
+              "hideTabs": true,
+              "expandTOC": true
+            }
+          },
+          "meta": {},
+          "key": "string",
+          "workbookId": "string",
+          "name": "string"
+        },
+        "mode": "save"
+      },
+      "responseExample": {
+        "entry": {
+          "createdAt": "string",
+          "createdBy": "string",
+          "data": {
+            "counter": 1,
+            "salt": "string",
+            "schemeVersion": 8,
+            "tabs": [
+              {
+                "id": "string",
+                "title": "string",
+                "items": [
+                  {
+                    "id": "string",
+                    "namespace": "default",
+                    "type": "title",
+                    "data": {
+                      "text": "string"
+                    }
+                  }
+                ],
+                "layout": [
+                  {
+                    "i": "string",
+                    "h": 1,
+                    "w": 1,
+                    "x": 1,
+                    "y": 1
+                  }
+                ],
+                "connections": [
+                  {
+                    "from": "string",
+                    "to": "string",
+                    "kind": "ignore"
+                  }
+                ],
+                "aliases": {
+                  "default": [
+                    [
+                      "string"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "settings": {
+              "autoupdateInterval": 30,
+              "maxConcurrentRequests": 1,
+              "silentLoading": true,
+              "dependentSelectors": true,
+              "hideTabs": true,
+              "expandTOC": true
+            }
+          },
+          "entryId": "string",
+          "hidden": true,
+          "key": "string",
+          "meta": {},
+          "public": true,
+          "publishedId": "string",
+          "revId": "string",
+          "savedId": "string",
+          "scope": "dash",
+          "tenantId": "string",
+          "type": "",
+          "updatedAt": "string",
+          "updatedBy": "string",
+          "version": 1,
+          "workbookId": "string"
+        }
       }
     },
     {
@@ -3212,6 +3616,138 @@
           "mode"
         ],
         "additionalProperties": false
+      },
+      "requestExample": {
+        "entry": {
+          "entryId": "string",
+          "data": {
+            "counter": 1,
+            "salt": "string",
+            "schemeVersion": 8,
+            "tabs": [
+              {
+                "id": "string",
+                "title": "string",
+                "items": [
+                  {
+                    "id": "string",
+                    "namespace": "default",
+                    "type": "title",
+                    "data": {
+                      "text": "string"
+                    }
+                  }
+                ],
+                "layout": [
+                  {
+                    "i": "string",
+                    "h": 1,
+                    "w": 1,
+                    "x": 1,
+                    "y": 1
+                  }
+                ],
+                "connections": [
+                  {
+                    "from": "string",
+                    "to": "string",
+                    "kind": "ignore"
+                  }
+                ],
+                "aliases": {
+                  "default": [
+                    [
+                      "string"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "settings": {
+              "autoupdateInterval": 30,
+              "maxConcurrentRequests": 1,
+              "silentLoading": true,
+              "dependentSelectors": true,
+              "hideTabs": true,
+              "expandTOC": true
+            }
+          },
+          "meta": {}
+        },
+        "mode": "save"
+      },
+      "responseExample": {
+        "entry": {
+          "createdAt": "string",
+          "createdBy": "string",
+          "data": {
+            "counter": 1,
+            "salt": "string",
+            "schemeVersion": 8,
+            "tabs": [
+              {
+                "id": "string",
+                "title": "string",
+                "items": [
+                  {
+                    "id": "string",
+                    "namespace": "default",
+                    "type": "title",
+                    "data": {
+                      "text": "string"
+                    }
+                  }
+                ],
+                "layout": [
+                  {
+                    "i": "string",
+                    "h": 1,
+                    "w": 1,
+                    "x": 1,
+                    "y": 1
+                  }
+                ],
+                "connections": [
+                  {
+                    "from": "string",
+                    "to": "string",
+                    "kind": "ignore"
+                  }
+                ],
+                "aliases": {
+                  "default": [
+                    [
+                      "string"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "settings": {
+              "autoupdateInterval": 30,
+              "maxConcurrentRequests": 1,
+              "silentLoading": true,
+              "dependentSelectors": true,
+              "hideTabs": true,
+              "expandTOC": true
+            }
+          },
+          "entryId": "string",
+          "hidden": true,
+          "key": "string",
+          "meta": {},
+          "public": true,
+          "publishedId": "string",
+          "revId": "string",
+          "savedId": "string",
+          "scope": "dash",
+          "tenantId": "string",
+          "type": "",
+          "updatedAt": "string",
+          "updatedBy": "string",
+          "version": 1,
+          "workbookId": "string"
+        }
       }
     },
     {
@@ -3236,7 +3772,11 @@
           "dashboardId"
         ],
         "additionalProperties": false
-      }
+      },
+      "requestExample": {
+        "dashboardId": "string"
+      },
+      "responseExample": {}
     },
     {
       "method": "getDataset",
@@ -3266,6 +3806,33 @@
           "datasetId"
         ],
         "additionalProperties": false
+      },
+      "requestExample": {
+        "datasetId": "string"
+      },
+      "responseExample": {
+        "dataset": {
+          "avatar_relations": [
+            {
+              "id": "string"
+            }
+          ],
+          "component_errors": {
+            "items": [
+              {
+                "errors": [
+                  {
+                    "details": {},
+                    "level": "error"
+                  }
+                ],
+                "id": "string",
+                "type": "data_source"
+              }
+            ]
+          },
+          "data_export_forbidden": true
+        }
       }
     },
     {
@@ -3278,6 +3845,54 @@
       "description": null,
       "requestSchema": {
         "$ref": "#/components/schemas/DatasetCreate"
+      },
+      "requestExample": {
+        "dataset": {
+          "avatar_relations": [
+            {
+              "id": "string"
+            }
+          ],
+          "component_errors": {
+            "items": [
+              {
+                "errors": [
+                  {
+                    "details": {},
+                    "level": "error"
+                  }
+                ],
+                "id": "string",
+                "type": "data_source"
+              }
+            ]
+          },
+          "data_export_forbidden": true
+        }
+      },
+      "responseExample": {
+        "dataset": {
+          "avatar_relations": [
+            {
+              "id": "string"
+            }
+          ],
+          "component_errors": {
+            "items": [
+              {
+                "errors": [
+                  {
+                    "details": {},
+                    "level": "error"
+                  }
+                ],
+                "id": "string",
+                "type": "data_source"
+              }
+            ]
+          },
+          "data_export_forbidden": true
+        }
       }
     },
     {
@@ -3302,6 +3917,33 @@
           "datasetId"
         ],
         "additionalProperties": false
+      },
+      "requestExample": {
+        "datasetId": "string"
+      },
+      "responseExample": {
+        "dataset": {
+          "avatar_relations": [
+            {
+              "id": "string"
+            }
+          ],
+          "component_errors": {
+            "items": [
+              {
+                "errors": [
+                  {
+                    "details": {},
+                    "level": "error"
+                  }
+                ],
+                "id": "string",
+                "type": "data_source"
+              }
+            ]
+          },
+          "data_export_forbidden": true
+        }
       }
     },
     {
@@ -3323,7 +3965,11 @@
           "datasetId"
         ],
         "additionalProperties": false
-      }
+      },
+      "requestExample": {
+        "datasetId": "string"
+      },
+      "responseExample": null
     },
     {
       "method": "validateDataset",
@@ -3353,6 +3999,33 @@
           "datasetId"
         ],
         "additionalProperties": false
+      },
+      "requestExample": {
+        "datasetId": "string"
+      },
+      "responseExample": {
+        "dataset": {
+          "avatar_relations": [
+            {
+              "id": "string"
+            }
+          ],
+          "component_errors": {
+            "items": [
+              {
+                "errors": [
+                  {
+                    "details": {},
+                    "level": "error"
+                  }
+                ],
+                "id": "string",
+                "type": "data_source"
+              }
+            ]
+          },
+          "data_export_forbidden": true
+        }
       }
     },
     {
@@ -3403,6 +4076,26 @@
           "entryIds"
         ],
         "additionalProperties": false
+      },
+      "requestExample": {
+        "entryIds": [
+          "string"
+        ]
+      },
+      "responseExample": {
+        "relations": [
+          {
+            "entryId": "string",
+            "key": "string",
+            "scope": "dash",
+            "type": "string",
+            "createdAt": "string",
+            "public": true,
+            "tenantId": "string",
+            "workbookId": "string",
+            "collectionId": "string"
+          }
+        ]
       }
     },
     {
@@ -3538,6 +4231,22 @@
             ]
           }
         ]
+      },
+      "requestExample": {
+        "excludeLocked": true,
+        "includeData": true,
+        "includeLinks": true,
+        "scope": "string"
+      },
+      "responseExample": {
+        "entries": [
+          {
+            "isLocked": true,
+            "entryId": "string",
+            "scope": "string",
+            "type": "string"
+          }
+        ]
       }
     },
     {
@@ -3584,7 +4293,11 @@
           "chartId"
         ],
         "additionalProperties": false
-      }
+      },
+      "requestExample": {
+        "chartId": "string"
+      },
+      "responseExample": null
     },
     {
       "method": "deleteQLChart",
@@ -3605,7 +4318,11 @@
           "chartId"
         ],
         "additionalProperties": false
-      }
+      },
+      "requestExample": {
+        "chartId": "string"
+      },
+      "responseExample": {}
     },
     {
       "method": "updateQLChart",
@@ -3658,7 +4375,14 @@
           "data"
         ],
         "additionalProperties": {}
-      }
+      },
+      "requestExample": {
+        "entryId": "string",
+        "template": "ql",
+        "mode": "save",
+        "data": {}
+      },
+      "responseExample": {}
     },
     {
       "method": "createQLChart",
@@ -3717,7 +4441,15 @@
             }
           }
         ]
-      }
+      },
+      "requestExample": {
+        "template": "ql",
+        "data": {},
+        "key": "string",
+        "workbookId": "string",
+        "name": "string"
+      },
+      "responseExample": {}
     },
     {
       "method": "getWizardChart",
@@ -3763,7 +4495,11 @@
           "chartId"
         ],
         "additionalProperties": false
-      }
+      },
+      "requestExample": {
+        "chartId": "string"
+      },
+      "responseExample": null
     },
     {
       "method": "deleteWizardChart",
@@ -3784,7 +4520,11 @@
           "chartId"
         ],
         "additionalProperties": false
-      }
+      },
+      "requestExample": {
+        "chartId": "string"
+      },
+      "responseExample": {}
     },
     {
       "method": "updateWizardChart",
@@ -3837,7 +4577,14 @@
           "data"
         ],
         "additionalProperties": {}
-      }
+      },
+      "requestExample": {
+        "entryId": "string",
+        "template": "datalens",
+        "mode": "save",
+        "data": {}
+      },
+      "responseExample": {}
     },
     {
       "method": "createWizardChart",
@@ -3896,7 +4643,15 @@
             }
           }
         ]
-      }
+      },
+      "requestExample": {
+        "template": "datalens",
+        "data": {},
+        "key": "string",
+        "workbookId": "string",
+        "name": "string"
+      },
+      "responseExample": {}
     },
     {
       "method": "createWorkbook",
@@ -3925,6 +4680,36 @@
         "required": [
           "title"
         ]
+      },
+      "requestExample": {
+        "title": "string"
+      },
+      "responseExample": {
+        "workbookId": "string",
+        "collectionId": "string",
+        "title": "string",
+        "description": "string",
+        "tenantId": "string",
+        "meta": {
+          "importId": "string"
+        },
+        "createdBy": "string",
+        "createdAt": "string",
+        "updatedBy": "string",
+        "updatedAt": "string",
+        "operation": {
+          "id": "string",
+          "description": "string",
+          "createdBy": "string",
+          "createdAt": {
+            "seconds": "string"
+          },
+          "modifiedAt": {
+            "seconds": "string"
+          },
+          "metadata": {},
+          "done": true
+        }
       }
     },
     {
@@ -3945,6 +4730,23 @@
         "required": [
           "workbookId"
         ]
+      },
+      "requestExample": {
+        "workbookId": "string"
+      },
+      "responseExample": {
+        "workbookId": "string",
+        "collectionId": "string",
+        "title": "string",
+        "description": "string",
+        "tenantId": "string",
+        "meta": {
+          "importId": "string"
+        },
+        "createdBy": "string",
+        "createdAt": "string",
+        "updatedBy": "string",
+        "updatedAt": "string"
       }
     },
     {
@@ -3967,6 +4769,29 @@
         },
         "required": [
           "workbookIds"
+        ]
+      },
+      "requestExample": {
+        "workbookIds": [
+          "string"
+        ]
+      },
+      "responseExample": {
+        "workbooks": [
+          {
+            "workbookId": "string",
+            "collectionId": "string",
+            "title": "string",
+            "description": "string",
+            "tenantId": "string",
+            "meta": {
+              "importId": "string"
+            },
+            "createdBy": "string",
+            "createdAt": "string",
+            "updatedBy": "string",
+            "updatedAt": "string"
+          }
         ]
       }
     },
@@ -3991,6 +4816,35 @@
         "required": [
           "workbookId"
         ]
+      },
+      "requestExample": {
+        "workbookId": "string"
+      },
+      "responseExample": {
+        "workbookId": "string",
+        "collectionId": "string",
+        "title": "string",
+        "description": "string",
+        "tenantId": "string",
+        "meta": {
+          "importId": "string"
+        },
+        "createdBy": "string",
+        "createdAt": "string",
+        "updatedBy": "string",
+        "updatedAt": "string",
+        "permissions": {
+          "listAccessBindings": true,
+          "updateAccessBindings": true,
+          "limitedView": true,
+          "view": true,
+          "update": true,
+          "copy": true,
+          "move": true,
+          "publish": true,
+          "embed": true,
+          "delete": true
+        }
       }
     },
     {
@@ -4041,6 +4895,29 @@
             "type": "boolean"
           }
         }
+      },
+      "requestExample": {
+        "collectionId": "string",
+        "includePermissionsInfo": true,
+        "filterString": "string"
+      },
+      "responseExample": {
+        "workbooks": [
+          {
+            "workbookId": "string",
+            "collectionId": "string",
+            "title": "string",
+            "description": "string",
+            "tenantId": "string",
+            "meta": {
+              "importId": "string"
+            },
+            "createdBy": "string",
+            "createdAt": "string",
+            "updatedBy": "string",
+            "updatedAt": "string"
+          }
+        ]
       }
     },
     {
@@ -4071,6 +4948,24 @@
           "workbookId",
           "collectionId"
         ]
+      },
+      "requestExample": {
+        "workbookId": "string",
+        "collectionId": "string"
+      },
+      "responseExample": {
+        "workbookId": "string",
+        "collectionId": "string",
+        "title": "string",
+        "description": "string",
+        "tenantId": "string",
+        "meta": {
+          "importId": "string"
+        },
+        "createdBy": "string",
+        "createdAt": "string",
+        "updatedBy": "string",
+        "updatedAt": "string"
       }
     },
     {
@@ -4101,6 +4996,30 @@
           "workbookIds",
           "collectionId"
         ]
+      },
+      "requestExample": {
+        "workbookIds": [
+          "string"
+        ],
+        "collectionId": "string"
+      },
+      "responseExample": {
+        "workbooks": [
+          {
+            "workbookId": "string",
+            "collectionId": "string",
+            "title": "string",
+            "description": "string",
+            "tenantId": "string",
+            "meta": {
+              "importId": "string"
+            },
+            "createdBy": "string",
+            "createdAt": "string",
+            "updatedBy": "string",
+            "updatedAt": "string"
+          }
+        ]
       }
     },
     {
@@ -4127,6 +5046,23 @@
         "required": [
           "workbookId"
         ]
+      },
+      "requestExample": {
+        "workbookId": "string"
+      },
+      "responseExample": {
+        "workbookId": "string",
+        "collectionId": "string",
+        "title": "string",
+        "description": "string",
+        "tenantId": "string",
+        "meta": {
+          "importId": "string"
+        },
+        "createdBy": "string",
+        "createdAt": "string",
+        "updatedBy": "string",
+        "updatedAt": "string"
       }
     },
     {
@@ -4206,6 +5142,35 @@
         "required": [
           "workbookId"
         ]
+      },
+      "requestExample": {
+        "workbookId": "string"
+      },
+      "responseExample": {
+        "entries": [
+          {
+            "entryId": "string",
+            "scope": "dash",
+            "type": "string",
+            "key": "string",
+            "displayKey": "string",
+            "createdBy": "string",
+            "createdAt": "string",
+            "updatedBy": "string",
+            "updatedAt": "string",
+            "savedId": "string",
+            "publishedId": "string",
+            "revId": "string",
+            "meta": {},
+            "hidden": true,
+            "workbookId": "string",
+            "collectionId": "string",
+            "tenantId": "string",
+            "isFavorite": true,
+            "isLocked": true,
+            "mirrored": true
+          }
+        ]
       }
     },
     {
@@ -4218,6 +5183,38 @@
       "description": null,
       "requestSchema": {
         "$ref": "#/components/schemas/GetEditorChartArgs"
+      },
+      "requestExample": {
+        "chartId": "string"
+      },
+      "responseExample": {
+        "entry": {
+          "version": 1,
+          "entryId": "string",
+          "key": "string",
+          "createdAt": "string",
+          "createdBy": "string",
+          "updatedAt": "string",
+          "updatedBy": "string",
+          "revId": "string",
+          "savedId": "string",
+          "publishedId": "string",
+          "tenantId": "string",
+          "hidden": true,
+          "public": true,
+          "workbookId": "string",
+          "scope": "widget",
+          "meta": {},
+          "type": "table_node",
+          "data": {
+            "meta": "string",
+            "params": "string",
+            "sources": "string",
+            "controls": "string",
+            "prepare": "string",
+            "config": "string"
+          }
+        }
       }
     },
     {
@@ -4238,7 +5235,11 @@
         "required": [
           "chartId"
         ]
-      }
+      },
+      "requestExample": {
+        "chartId": "string"
+      },
+      "responseExample": {}
     },
     {
       "method": "createEditorChart",
@@ -4250,6 +5251,48 @@
       "description": null,
       "requestSchema": {
         "$ref": "#/components/schemas/CreateEditorChartArgs"
+      },
+      "requestExample": {
+        "entry": {
+          "type": "table_node",
+          "data": {
+            "meta": "string",
+            "params": "string",
+            "sources": "string",
+            "controls": "string",
+            "prepare": "string",
+            "config": "string"
+          }
+        }
+      },
+      "responseExample": {
+        "entry": {
+          "version": 1,
+          "entryId": "string",
+          "key": "string",
+          "createdAt": "string",
+          "createdBy": "string",
+          "updatedAt": "string",
+          "updatedBy": "string",
+          "revId": "string",
+          "savedId": "string",
+          "publishedId": "string",
+          "tenantId": "string",
+          "hidden": true,
+          "public": true,
+          "workbookId": "string",
+          "scope": "widget",
+          "meta": {},
+          "type": "table_node",
+          "data": {
+            "meta": "string",
+            "params": "string",
+            "sources": "string",
+            "controls": "string",
+            "prepare": "string",
+            "config": "string"
+          }
+        }
       }
     },
     {
@@ -4262,6 +5305,50 @@
       "description": null,
       "requestSchema": {
         "$ref": "#/components/schemas/UpdateEditorChartArgs"
+      },
+      "requestExample": {
+        "mode": "save",
+        "entry": {
+          "entryId": "string",
+          "type": "table_node",
+          "data": {
+            "meta": "string",
+            "params": "string",
+            "sources": "string",
+            "controls": "string",
+            "prepare": "string",
+            "config": "string"
+          }
+        }
+      },
+      "responseExample": {
+        "entry": {
+          "version": 1,
+          "entryId": "string",
+          "key": "string",
+          "createdAt": "string",
+          "createdBy": "string",
+          "updatedAt": "string",
+          "updatedBy": "string",
+          "revId": "string",
+          "savedId": "string",
+          "publishedId": "string",
+          "tenantId": "string",
+          "hidden": true,
+          "public": true,
+          "workbookId": "string",
+          "scope": "widget",
+          "meta": {},
+          "type": "table_node",
+          "data": {
+            "meta": "string",
+            "params": "string",
+            "sources": "string",
+            "controls": "string",
+            "prepare": "string",
+            "config": "string"
+          }
+        }
       }
     },
     {
@@ -4332,6 +5419,47 @@
           "publicParamsMode",
           "settings"
         ]
+      },
+      "requestExample": {
+        "title": "string",
+        "embeddingSecretId": "string",
+        "entryId": "string",
+        "depsIds": [
+          "string"
+        ],
+        "unsignedParams": [
+          "string"
+        ],
+        "privateParams": [
+          "string"
+        ],
+        "publicParamsMode": true,
+        "settings": {
+          "enableExport": true
+        }
+      },
+      "responseExample": {
+        "embedId": "string",
+        "title": "string",
+        "embeddingSecretId": "string",
+        "entryId": "string",
+        "depsIds": [
+          "string"
+        ],
+        "unsignedParams": [
+          "string"
+        ],
+        "privateParams": [
+          "string"
+        ],
+        "createdBy": "string",
+        "createdAt": "string",
+        "updatedAt": "string",
+        "updatedBy": "string",
+        "publicParamsMode": true,
+        "settings": {
+          "enableExport": true
+        }
       }
     },
     {
@@ -4353,7 +5481,35 @@
         "required": [
           "entryId"
         ]
-      }
+      },
+      "requestExample": {
+        "entryId": "string"
+      },
+      "responseExample": [
+        {
+          "embedId": "string",
+          "title": "string",
+          "embeddingSecretId": "string",
+          "entryId": "string",
+          "depsIds": [
+            "string"
+          ],
+          "unsignedParams": [
+            "string"
+          ],
+          "privateParams": [
+            "string"
+          ],
+          "createdBy": "string",
+          "createdAt": "string",
+          "updatedAt": "string",
+          "updatedBy": "string",
+          "publicParamsMode": true,
+          "settings": {
+            "enableExport": true
+          }
+        }
+      ]
     },
     {
       "method": "deleteEmbed",
@@ -4374,6 +5530,12 @@
         "required": [
           "embedId"
         ]
+      },
+      "requestExample": {
+        "embedId": "string"
+      },
+      "responseExample": {
+        "embedId": "string"
       }
     },
     {
@@ -4437,6 +5599,47 @@
           "publicParamsMode",
           "settings"
         ]
+      },
+      "requestExample": {
+        "embedId": "string",
+        "title": "string",
+        "embeddingSecretId": "string",
+        "depsIds": [
+          "string"
+        ],
+        "unsignedParams": [
+          "string"
+        ],
+        "privateParams": [
+          "string"
+        ],
+        "publicParamsMode": true,
+        "settings": {
+          "enableExport": true
+        }
+      },
+      "responseExample": {
+        "embedId": "string",
+        "title": "string",
+        "embeddingSecretId": "string",
+        "entryId": "string",
+        "depsIds": [
+          "string"
+        ],
+        "unsignedParams": [
+          "string"
+        ],
+        "privateParams": [
+          "string"
+        ],
+        "createdBy": "string",
+        "createdAt": "string",
+        "updatedAt": "string",
+        "updatedBy": "string",
+        "publicParamsMode": true,
+        "settings": {
+          "enableExport": true
+        }
       }
     },
     {
@@ -4461,7 +5664,13 @@
           "entryIds"
         ],
         "additionalProperties": false
-      }
+      },
+      "requestExample": {
+        "entryIds": [
+          "string"
+        ]
+      },
+      "responseExample": {}
     },
     {
       "method": "createEmbeddingSecret",
@@ -4487,6 +5696,14 @@
           "title",
           "workbookId"
         ]
+      },
+      "requestExample": {
+        "title": "string",
+        "workbookId": "string"
+      },
+      "responseExample": {
+        "embeddingSecretId": "string",
+        "privateKey": "string"
       }
     },
     {
@@ -4508,7 +5725,19 @@
         "required": [
           "workbookId"
         ]
-      }
+      },
+      "requestExample": {
+        "workbookId": "string"
+      },
+      "responseExample": [
+        {
+          "embeddingSecretId": "string",
+          "title": "string",
+          "workbookId": "string",
+          "createdBy": "string",
+          "createdAt": "string"
+        }
+      ]
     },
     {
       "method": "deleteEmbeddingSecret",
@@ -4529,6 +5758,12 @@
         "required": [
           "embeddingSecretId"
         ]
+      },
+      "requestExample": {
+        "embeddingSecretId": "string"
+      },
+      "responseExample": {
+        "embeddingSecretId": "string"
       }
     },
     {
@@ -4550,6 +5785,16 @@
         "required": [
           "embeddingSecretId"
         ]
+      },
+      "requestExample": {
+        "embeddingSecretId": "string"
+      },
+      "responseExample": {
+        "embeddingSecretId": "string",
+        "title": "string",
+        "workbookId": "string",
+        "createdBy": "string",
+        "createdAt": "string"
       }
     },
     {
@@ -4586,6 +5831,24 @@
           "from"
         ],
         "additionalProperties": false
+      },
+      "requestExample": {
+        "from": "2026-01-01T00:00:00Z"
+      },
+      "responseExample": {
+        "entries": [
+          {
+            "entryId": "string",
+            "key": "string",
+            "isDeleted": true,
+            "workbookId": "string",
+            "collectionId": "string",
+            "scope": "dash",
+            "type": "string",
+            "updatedAt": "string",
+            "userId": "string"
+          }
+        ]
       }
     },
     {
@@ -4661,6 +5924,34 @@
           "collectionId",
           "deltas"
         ]
+      },
+      "requestExample": {
+        "collectionId": "string",
+        "deltas": [
+          {
+            "action": "ADD",
+            "accessBinding": {
+              "roleId": "string",
+              "subject": {
+                "id": "string",
+                "type": "system"
+              }
+            }
+          }
+        ]
+      },
+      "responseExample": {
+        "id": "string",
+        "description": "string",
+        "createdBy": "string",
+        "createdAt": {
+          "seconds": "string"
+        },
+        "modifiedAt": {
+          "seconds": "string"
+        },
+        "metadata": {},
+        "done": true
       }
     },
     {
@@ -4763,6 +6054,29 @@
           "key"
         ],
         "additionalProperties": false
+      },
+      "requestExample": {
+        "key": "string"
+      },
+      "responseExample": {
+        "entryId": "string",
+        "scope": "folder",
+        "type": "",
+        "key": "string",
+        "unversionedData": {},
+        "createdBy": "string",
+        "createdAt": "string",
+        "updatedBy": "string",
+        "updatedAt": "string",
+        "savedId": "string",
+        "revId": "string",
+        "publishedId": "string",
+        "tenantId": "string",
+        "data": {},
+        "meta": {},
+        "hidden": true,
+        "mirrored": true,
+        "public": true
       }
     },
     {
@@ -4833,6 +6147,52 @@
             "type": "boolean"
           }
         }
+      },
+      "requestExample": {
+        "path": "string",
+        "createdBy": "string",
+        "orderBy": {
+          "field": "createdAt",
+          "direction": "desc"
+        }
+      },
+      "responseExample": {
+        "nextPageToken": true,
+        "breadCrumbs": [
+          {
+            "title": "string",
+            "path": "string",
+            "entryId": "string",
+            "isLocked": true,
+            "permissions": {
+              "execute": true,
+              "read": true,
+              "edit": true,
+              "admin": true
+            }
+          }
+        ],
+        "entries": [
+          {
+            "entryId": "string",
+            "key": "string",
+            "scope": "string",
+            "type": "string",
+            "meta": {},
+            "createdAt": "string",
+            "updatedAt": "string",
+            "createdBy": "string",
+            "updatedBy": "string",
+            "savedId": "string",
+            "publishedId": "string",
+            "hidden": true,
+            "workbookId": "string",
+            "collectionId": "string",
+            "isFavorite": true,
+            "isLocked": true,
+            "name": "string"
+          }
+        ]
       }
     },
     {
@@ -4908,6 +6268,34 @@
           "workbookId",
           "deltas"
         ]
+      },
+      "requestExample": {
+        "workbookId": "string",
+        "deltas": [
+          {
+            "action": "ADD",
+            "accessBinding": {
+              "roleId": "string",
+              "subject": {
+                "id": "string",
+                "type": "system"
+              }
+            }
+          }
+        ]
+      },
+      "responseExample": {
+        "id": "string",
+        "description": "string",
+        "createdBy": "string",
+        "createdAt": {
+          "seconds": "string"
+        },
+        "modifiedAt": {
+          "seconds": "string"
+        },
+        "metadata": {},
+        "done": true
       }
     }
   ]

@@ -34,7 +34,7 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
 
 - Служебные:
   - `datalens_list_methods`: возвращает полный каталог RPC-методов DataLens (сейчас 60 методов), соответствующие MCP tools, категории и метаданные снимка.
-  - `datalens_get_method_schema`: возвращает схему параметров и подсказки по вызову для одного метода из каталога.
+  - `datalens_get_method_schema`: возвращает схему параметров, подсказки по вызову и встроенные статические значения `requestExample` / `responseExample` из встроенного OpenAPI snapshot.
   - `datalens_rpc`: универсальный fallback для любого метода по пути `/rpc/{method}`.
 - Типизированные обёртки (основные high-frequency методы):
   - `datalens_get_connection` -> `getConnection`
@@ -58,7 +58,7 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
 
 - Полный каталог методов:
   - `datalens_list_methods` отдаёт полный RPC-каталог из snapshot OpenAPI (`60` методов на эту дату).
-  - `datalens_get_method_schema` возвращает схему параметров и метаданные вызова для каждого метода.
+  - `datalens_get_method_schema` возвращает схему параметров, метаданные вызова и статические примеры из встроенного snapshot.
 - Политика типизированного покрытия:
   - Сервер оставляет типизированные обёртки только для основных high-frequency операций.
   - Это сделано специально: чтобы уменьшить размер `tools/list` и экономить окно контекста модели.

@@ -180,6 +180,14 @@ fn datalens_get_method_schema_covers_every_listed_method() -> Result<()> {
                 schema.get("requestSchema").is_some_and(Value::is_object),
                 "method {method_name} must return object requestSchema"
             );
+            assert!(
+                schema.get("requestExample").is_some(),
+                "method {method_name} must return requestExample from embedded snapshot"
+            );
+            assert!(
+                schema.get("responseExample").is_some(),
+                "method {method_name} must return responseExample from embedded snapshot"
+            );
 
             assert_eq!(
                 schema.get("invokeWith"),
