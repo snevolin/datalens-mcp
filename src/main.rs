@@ -20,6 +20,8 @@ use serde_json::{Map, Value, json};
 use tracing::{debug, info, warn};
 use tracing_subscriber::EnvFilter;
 
+type ToolJson = Json<Map<String, Value>>;
+
 const DEFAULT_BASE_URL: &str = "https://api.datalens.tech";
 const DEFAULT_API_VERSION: &str = "0";
 const DEFAULT_TIMEOUT_SECONDS: u64 = 30;
@@ -291,7 +293,7 @@ macro_rules! rpc_payload_tool {
         async fn $fn_name(
             &self,
             Parameters(args): Parameters<RpcPayloadArgs>,
-        ) -> Result<Json<Value>, McpError> {
+        ) -> Result<ToolJson, McpError> {
             let payload = Value::Object(args.payload.into_iter().collect());
             self.call_rpc($method_name, payload).await
         }
@@ -320,7 +322,7 @@ impl DataLensServer {
     async fn datalens_rpc(
         &self,
         Parameters(args): Parameters<DatalensRpcArgs>,
-    ) -> Result<Json<Value>, McpError> {
+    ) -> Result<ToolJson, McpError> {
         self.call_rpc(&args.method, args.payload).await
     }
 
@@ -331,7 +333,7 @@ impl DataLensServer {
     async fn datalens_list_methods(
         &self,
         Parameters(_args): Parameters<NoArgs>,
-    ) -> Result<Json<Value>, McpError> {
+    ) -> Result<ToolJson, McpError> {
         let methods = METHOD_CATALOG
             .iter()
             .map(|item| {
@@ -344,13 +346,18 @@ impl DataLensServer {
             })
             .collect::<Vec<_>>();
 
-        Ok(Json(json!({
+        let response = json!({
             "snapshotDate": METHOD_CATALOG_SNAPSHOT_DATE,
             "sourceUrl": METHOD_CATALOG_SOURCE_URL,
             "totalMethods": methods.len(),
             "genericTool": "datalens_rpc",
             "methods": methods,
-        })))
+        });
+        let response = response.as_object().cloned().ok_or_else(|| {
+            McpError::internal_error("failed to build method catalog response object", None)
+        })?;
+
+        Ok(Json(response))
     }
 
     #[tool(
@@ -360,7 +367,7 @@ impl DataLensServer {
     async fn datalens_list_directory(
         &self,
         Parameters(args): Parameters<ListDirectoryArgs>,
-    ) -> Result<Json<Value>, McpError> {
+    ) -> Result<ToolJson, McpError> {
         let mut payload = Map::new();
         payload.insert("path".to_owned(), Value::String(args.path));
         extend_with_extra(&mut payload, args.extra);
@@ -375,7 +382,7 @@ impl DataLensServer {
     async fn datalens_get_entries(
         &self,
         Parameters(args): Parameters<RpcPayloadArgs>,
-    ) -> Result<Json<Value>, McpError> {
+    ) -> Result<ToolJson, McpError> {
         let payload = Value::Object(args.payload.into_iter().collect());
         self.call_rpc("getEntries", payload).await
     }
@@ -387,7 +394,7 @@ impl DataLensServer {
     async fn datalens_get_dataset(
         &self,
         Parameters(args): Parameters<GetDatasetArgs>,
-    ) -> Result<Json<Value>, McpError> {
+    ) -> Result<ToolJson, McpError> {
         let mut payload = Map::new();
         payload.insert("datasetId".to_owned(), Value::String(args.dataset_id));
 
@@ -409,7 +416,7 @@ impl DataLensServer {
     async fn datalens_get_dashboard(
         &self,
         Parameters(args): Parameters<GetDashboardArgs>,
-    ) -> Result<Json<Value>, McpError> {
+    ) -> Result<ToolJson, McpError> {
         let mut payload = Map::new();
         payload.insert("dashboardId".to_owned(), Value::String(args.dashboard_id));
 
@@ -606,7 +613,7 @@ impl ServerHandler for DataLensServer {
 }
 
 impl DataLensServer {
-    async fn call_rpc(&self, method: &str, payload: Value) -> Result<Json<Value>, McpError> {
+    async fn call_rpc(&self, method: &str, payload: Value) -> Result<ToolJson, McpError> {
         if !payload.is_object() {
             return Err(McpError::invalid_params(
                 "payload must be a JSON object",
@@ -673,12 +680,12 @@ impl DataLensServer {
         }
 
         if body.trim().is_empty() {
-            return Ok(Json(Value::Object(Map::new())));
+            return Ok(Json(Map::new()));
         }
 
-        let parsed = serde_json::from_str::<Value>(&body).map_err(|error| {
+        let parsed = serde_json::from_str::<Map<String, Value>>(&body).map_err(|error| {
             McpError::internal_error(
-                format!("DataLens API returned invalid JSON: {error}"),
+                format!("DataLens API returned invalid or non-object JSON: {error}"),
                 Some(json!({
                     "method": method,
                     "body": truncate_utf8(&body, 2000),
@@ -760,6 +767,17 @@ fn default_root_path() -> String {
     "/".to_owned()
 }
 
+fn error_chain_contains(error: &(dyn std::error::Error + 'static), needle: &str) -> bool {
+    let mut current = Some(error);
+    while let Some(err) = current {
+        if err.to_string().contains(needle) {
+            return true;
+        }
+        current = err.source();
+    }
+    false
+}
+
 fn empty_json_object() -> Value {
     Value::Object(Map::new())
 }
@@ -796,10 +814,17 @@ async fn main() -> Result<()> {
     }
 
     let server = DataLensServer::new(cfg).context("failed to initialize server")?;
-    let service = server
-        .serve(stdio())
-        .await
-        .context("failed to start MCP stdio service")?;
+    let service = server.serve(stdio()).await.map_err(|error| {
+        if error_chain_contains(&error, "connection closed: initialized request")
+            || error_chain_contains(&error, "initialized request")
+        {
+            anyhow::anyhow!(
+                "MCP client is not connected: this binary is a stdio MCP server and must be launched by an MCP host (Codex/Cursor/Claude), not directly from a shell."
+            )
+        } else {
+            anyhow::Error::new(error).context("failed to start MCP stdio service")
+        }
+    })?;
 
     service
         .waiting()
@@ -929,7 +954,7 @@ mod tests {
             .await
             .expect("request must succeed");
 
-        assert_eq!(response.0, json!({"entries": []}));
+        assert_eq!(Value::Object(response.0), json!({"entries": []}));
     }
 
     #[tokio::test]
@@ -959,7 +984,7 @@ mod tests {
             .await
             .expect("tool call must succeed");
 
-        assert_eq!(result.0, json!({"ok": true}));
+        assert_eq!(Value::Object(result.0), json!({"ok": true}));
     }
 
     #[tokio::test]
@@ -986,6 +1011,6 @@ mod tests {
             .await
             .expect("tool call must succeed");
 
-        assert_eq!(result.0, json!({"datasetId": "ds-1"}));
+        assert_eq!(Value::Object(result.0), json!({"datasetId": "ds-1"}));
     }
 }
