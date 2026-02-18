@@ -4,6 +4,25 @@ Rust MCP server for the Yandex DataLens Public API (`https://api.datalens.tech`)
 
 This server uses the MCP `stdio` transport and exposes DataLens RPC methods as MCP tools.
 
+## Quick Start
+
+To start using `datalens-mcp`, follow this order:
+
+1. Install the MCP server:
+   - [Linux (x86_64, tar.gz)](#install-linux-targz)
+   - [Fedora Linux (RPM)](#install-fedora-rpm)
+   - [Debian/Ubuntu Linux (DEB)](#install-debian-ubuntu-deb)
+   - [macOS (Apple Silicon, aarch64 tar.gz)](#install-macos)
+   - [Windows (MSI or ZIP)](#install-windows)
+   - [Build from source](#install-build-from-source)
+2. Connect it to the agents you use:
+   - [Codex CLI / VS Code Codex Extension](#connect-codex)
+   - [Cursor](#connect-cursor)
+   - [Claude Code (CLI)](#connect-claude-code)
+   - [Claude Desktop](#connect-claude-desktop)
+3. Run first requests:
+   - [Usage examples](#usage-examples)
+
 ## Disclaimer
 
 - This is an unofficial, community-maintained project and is not affiliated with, sponsored by, or endorsed by Yandex.
@@ -74,6 +93,9 @@ From Yandex docs:
   - `x-dl-api-version`
   - auth token header (`x-dl-auth-token`; this server also sends `x-yacloud-subjecttoken`)
 
+Choose one token path: section 2 (`yc` CLI), section 3 (OAuth -> IAM), or section 4 (service account).  
+All of them must end with an IAM token in `YC_IAM_TOKEN` (or `DATALENS_IAM_TOKEN`).
+
 ### 1. Get Your DataLens Organization ID
 
 Official doc: <https://yandex.cloud/en/docs/organization/operations/organization-get-id>
@@ -102,7 +124,47 @@ yc iam create-token
 
 Important: IAM tokens expire. Refresh when expired.
 
-### 3. Automation-Friendly Path (Service Account + Key)
+### 3. Alternative Without YC CLI (OAuth -> IAM token)
+
+Official docs:
+- Account IAM token (OAuth exchange): <https://yandex.cloud/en/docs/iam/operations/iam-token/create>
+- IAM API method (`iam/v1/tokens`): <https://yandex.cloud/en/docs/iam/api-ref/IamToken/create>
+
+Use this path if you do not want to install `yc` locally.
+
+1. Sign in to your Yandex account.
+2. Open Yandex OAuth, click **Allow**, and copy the OAuth token:
+   - <https://oauth.yandex.com>
+3. Exchange OAuth token for IAM token:
+
+```bash
+curl \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{"yandexPassportOauthToken":"<OAuth_token>"}' \
+  https://iam.api.cloud.yandex.net/iam/v1/tokens
+```
+
+4. From the JSON response, take `iamToken` and set it as `YC_IAM_TOKEN`:
+
+```bash
+export YC_IAM_TOKEN="<iam_token>"
+```
+
+PowerShell variant:
+
+```powershell
+$yandexPassportOauthToken = "<OAuth_token>"
+$Body = @{ yandexPassportOauthToken = "$yandexPassportOauthToken" } | ConvertTo-Json -Compress
+$env:YC_IAM_TOKEN = (Invoke-RestMethod -Method 'POST' -Uri 'https://iam.api.cloud.yandex.net/iam/v1/tokens' -Body $Body -ContentType 'Application/json').iamToken
+```
+
+Important:
+- `OAuth_token` is not the same as `IAM token`.
+- For this server, always use the resulting IAM token in `YC_IAM_TOKEN` (or `DATALENS_IAM_TOKEN`).
+- IAM tokens expire (up to 12 hours). Refresh when expired.
+
+### 4. Automation-Friendly Path (Service Account + Key)
 
 Official docs:
 - Create service account: <https://yandex.cloud/en/docs/iam/quickstart-sa>
@@ -124,15 +186,17 @@ Use resulting values as:
 - `DATALENS_ORG_ID`
 - `YC_IAM_TOKEN` or `DATALENS_IAM_TOKEN`
 
-### 4. Where Key Setup Is Applied
+### 5. Where Key Setup Is Applied
 
 Installation sections below include platform-specific commands for setting these values on Linux, macOS, and Windows.
 
+<a id="installation"></a>
 ## Installation by Platform
 
 Release artifacts are published on GitHub Releases:
 <https://github.com/snevolin/datalens-mcp/releases>
 
+<a id="install-linux-targz"></a>
 ### Linux (x86_64, tar.gz)
 
 1. Download the Linux archive from the latest release.
@@ -159,6 +223,7 @@ Optional persistence for `DATALENS_ORG_ID`:
 echo 'export DATALENS_ORG_ID="<your_org_id>"' >> ~/.bashrc
 ```
 
+<a id="install-fedora-rpm"></a>
 ### Fedora Linux (RPM)
 
 1. Download RPM(s) from the release page.
@@ -175,6 +240,7 @@ export DATALENS_ORG_ID="<your_org_id>"
 export YC_IAM_TOKEN="$(yc iam create-token)"
 ```
 
+<a id="install-debian-ubuntu-deb"></a>
 ### Debian/Ubuntu Linux (DEB)
 
 1. Download `.deb` from the release page.
@@ -198,6 +264,7 @@ export DATALENS_ORG_ID="<your_org_id>"
 export YC_IAM_TOKEN="$(yc iam create-token)"
 ```
 
+<a id="install-macos"></a>
 ### macOS (Apple Silicon, aarch64 tar.gz)
 
 1. Download the macOS archive from the latest release.
@@ -221,6 +288,7 @@ Optional persistence for `DATALENS_ORG_ID`:
 echo 'export DATALENS_ORG_ID="<your_org_id>"' >> ~/.zshrc
 ```
 
+<a id="install-windows"></a>
 ### Windows (MSI or ZIP)
 
 Option A: MSI
@@ -242,6 +310,7 @@ setx DATALENS_ORG_ID "<your_org_id>"
 $env:YC_IAM_TOKEN = yc iam create-token
 ```
 
+<a id="install-build-from-source"></a>
 ### Build from Source (Any Platform)
 
 ```bash
@@ -272,8 +341,10 @@ $env:YC_IAM_TOKEN = yc iam create-token
 datalens-mcp.exe
 ```
 
+<a id="connect-mcp"></a>
 ## Connect as MCP Server
 
+<a id="connect-codex"></a>
 ### Codex CLI / VS Code Codex Extension
 
 Add server:
@@ -301,6 +372,7 @@ codex mcp add datalens \
 
 Note: if you store a direct token in config, you must update it after expiration.
 
+<a id="connect-cursor"></a>
 ### Cursor
 
 Official docs:
@@ -310,6 +382,7 @@ Official docs:
 You can configure MCP in:
 - Project scope: `.cursor/mcp.json` (shared with this repo)
 - User scope: `~/.cursor/mcp.json` (all projects)
+- User scope on Windows: `%USERPROFILE%\\.cursor\\mcp.json` (PowerShell: `$HOME\\.cursor\\mcp.json`)
 
 Example config:
 
@@ -339,6 +412,7 @@ cursor-agent mcp list
 cursor-agent mcp list-tools datalens
 ```
 
+<a id="connect-claude-code"></a>
 ### Claude Code (CLI)
 
 Official doc: <https://docs.anthropic.com/en/docs/claude-code/mcp>
@@ -358,6 +432,7 @@ claude mcp add datalens \
   -- /usr/local/bin/datalens-mcp
 ```
 
+<a id="connect-claude-desktop"></a>
 ### Claude Desktop
 
 Official docs:
@@ -394,6 +469,47 @@ Example config:
 For Windows, set `command` to your `.exe` path, for example:
 `C:\\Program Files\\datalens-mcp\\datalens-mcp.exe`
 
+<a id="usage-examples"></a>
+## Usage Examples
+
+After installation and MCP connection, try these common DataLens tasks in your agent:
+
+1. Inventory dashboards:
+
+```text
+Show all dashboards in my workspace with folder, owner, and last update date.
+```
+
+2. Audit stale objects:
+
+```text
+Find dashboards and datasets that were not updated in the last 90 days.
+```
+
+3. Inspect one dashboard:
+
+```text
+Open dashboard "<dashboard_id>" and summarize its charts, widgets, and selectors.
+```
+
+4. Inspect one dataset:
+
+```text
+Open dataset "<dataset_id>" and summarize fields, calculated fields, and joins.
+```
+
+5. Check access rights:
+
+```text
+Show who can view and edit entry "<entry_id>".
+```
+
+6. Run impact analysis before changes:
+
+```text
+For dataset "<dataset_id>", list dashboards and charts that depend on it.
+```
+
 ## Environment Variables
 
 - `DATALENS_ORG_ID` (required)
@@ -420,6 +536,8 @@ Apache-2.0 (see `LICENSE`).
 - IAM: assign role to service account: <https://yandex.cloud/en/docs/iam/operations/sa/assign-role-for-sa>
 - IAM: manage authorized keys: <https://yandex.cloud/en/docs/iam/operations/authentication/manage-authorized-keys>
 - IAM: create token for service account: <https://yandex.cloud/en/docs/iam/operations/iam-token/create-for-sa>
+- IAM: create account token from OAuth token: <https://yandex.cloud/en/docs/iam/operations/iam-token/create>
+- IAM API: `IamToken/create`: <https://yandex.cloud/en/docs/iam/api-ref/IamToken/create>
 - IAM: create token via CLI (`yc iam create-token`): <https://yandex.cloud/en/docs/iam/cli-ref/create-token>
 - Claude Code MCP docs: <https://docs.anthropic.com/en/docs/claude-code/mcp>
 - MCP local server connection guide (Claude Desktop config flow): <https://modelcontextprotocol.io/docs/develop/connect-local-servers>
