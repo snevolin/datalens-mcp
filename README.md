@@ -193,13 +193,12 @@ Installation sections below include platform-specific commands for setting these
 <a id="installation"></a>
 ## Installation by Platform
 
-Release artifacts are published on GitHub Releases:
-<https://github.com/snevolin/datalens-mcp/releases>
+Release artifacts are published on [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 
 <a id="install-linux-targz"></a>
 ### Linux (x86_64, tar.gz)
 
-1. Download the Linux archive from the latest release.
+1. Download the Linux archive from [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 2. Install binary:
 
 ```bash
@@ -226,7 +225,7 @@ echo 'export DATALENS_ORG_ID="<your_org_id>"' >> ~/.bashrc
 <a id="install-fedora-rpm"></a>
 ### Fedora Linux (RPM)
 
-1. Download RPM(s) from the release page.
+1. Download RPM(s) from [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 2. Install:
 
 ```bash
@@ -243,7 +242,7 @@ export YC_IAM_TOKEN="$(yc iam create-token)"
 <a id="install-debian-ubuntu-deb"></a>
 ### Debian/Ubuntu Linux (DEB)
 
-1. Download `.deb` from the release page.
+1. Download `.deb` from [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 2. Install:
 
 ```bash
@@ -267,7 +266,7 @@ export YC_IAM_TOKEN="$(yc iam create-token)"
 <a id="install-macos"></a>
 ### macOS (Apple Silicon, aarch64 tar.gz)
 
-1. Download the macOS archive from the latest release.
+1. Download the macOS archive from [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 2. Install binary:
 
 ```bash
@@ -292,11 +291,11 @@ echo 'export DATALENS_ORG_ID="<your_org_id>"' >> ~/.zshrc
 ### Windows (MSI or ZIP)
 
 Option A: MSI
-1. Download `.msi` from the release page.
+1. Download `.msi` from [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 2. Run installer.
 
 Option B: ZIP
-1. Download `.zip` from the release page.
+1. Download `.zip` from [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 2. Extract `datalens-mcp.exe`.
 3. Put it in a folder on `PATH`.
 

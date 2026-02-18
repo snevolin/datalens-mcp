@@ -193,13 +193,12 @@ $env:YC_IAM_TOKEN = (Invoke-RestMethod -Method 'POST' -Uri 'https://iam.api.clou
 <a id="installation"></a>
 ## Установка по платформам
 
-Артефакты сборок публикуются в GitHub Releases:
-<https://github.com/snevolin/datalens-mcp/releases>
+Артефакты сборок публикуются в [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 
 <a id="install-linux-targz"></a>
 ### Linux (x86_64, tar.gz)
 
-1. Скачайте Linux-архив из последнего релиза.
+1. Скачайте Linux-архив из [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 2. Установите бинарник:
 
 ```bash
@@ -226,7 +225,7 @@ echo 'export DATALENS_ORG_ID="<your_org_id>"' >> ~/.bashrc
 <a id="install-fedora-rpm"></a>
 ### Fedora Linux (RPM)
 
-1. Скачайте RPM из страницы релиза.
+1. Скачайте RPM из [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 2. Установите:
 
 ```bash
@@ -243,7 +242,7 @@ export YC_IAM_TOKEN="$(yc iam create-token)"
 <a id="install-debian-ubuntu-deb"></a>
 ### Debian/Ubuntu Linux (DEB)
 
-1. Скачайте `.deb` со страницы релиза.
+1. Скачайте `.deb` из [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 2. Установите:
 
 ```bash
@@ -267,7 +266,7 @@ export YC_IAM_TOKEN="$(yc iam create-token)"
 <a id="install-macos"></a>
 ### macOS (Apple Silicon, aarch64 tar.gz)
 
-1. Скачайте macOS-архив из последнего релиза.
+1. Скачайте macOS-архив из [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 2. Установите бинарник:
 
 ```bash
@@ -292,11 +291,11 @@ echo 'export DATALENS_ORG_ID="<your_org_id>"' >> ~/.zshrc
 ### Windows (MSI или ZIP)
 
 Вариант A: MSI
-1. Скачайте `.msi` со страницы релиза.
+1. Скачайте `.msi` из [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 2. Запустите установщик.
 
 Вариант B: ZIP
-1. Скачайте `.zip` со страницы релиза.
+1. Скачайте `.zip` из [GitHub Releases](https://github.com/snevolin/datalens-mcp/releases).
 2. Распакуйте `datalens-mcp.exe`.
 3. Положите бинарник в папку, добавленную в `PATH`.
 
