@@ -301,6 +301,44 @@ codex mcp add datalens \
 
 Note: if you store a direct token in config, you must update it after expiration.
 
+### Cursor
+
+Official docs:
+- Cursor MCP overview: <https://docs.cursor.com/context/model-context-protocol>
+- MCP configuration (`mcp.json`): <https://docs.cursor.com/context/mcp>
+
+You can configure MCP in:
+- Project scope: `.cursor/mcp.json` (shared with this repo)
+- User scope: `~/.cursor/mcp.json` (all projects)
+
+Example config:
+
+```json
+{
+  "mcpServers": {
+    "datalens": {
+      "type": "stdio",
+      "command": "/usr/local/bin/datalens-mcp",
+      "args": [],
+      "env": {
+        "DATALENS_ORG_ID": "<your_org_id>",
+        "YC_IAM_TOKEN": "<your_token>"
+      }
+    }
+  }
+}
+```
+
+For Windows, set `command` to your `.exe` path, for example:
+`C:\\Program Files\\datalens-mcp\\datalens-mcp.exe`
+
+Validate in Cursor Agent (optional):
+
+```bash
+cursor-agent mcp list
+cursor-agent mcp list-tools datalens
+```
+
 ### Claude Code (CLI)
 
 Official doc: <https://docs.anthropic.com/en/docs/claude-code/mcp>
@@ -385,3 +423,5 @@ Apache-2.0 (see `LICENSE`).
 - IAM: create token via CLI (`yc iam create-token`): <https://yandex.cloud/en/docs/iam/cli-ref/create-token>
 - Claude Code MCP docs: <https://docs.anthropic.com/en/docs/claude-code/mcp>
 - MCP local server connection guide (Claude Desktop config flow): <https://modelcontextprotocol.io/docs/develop/connect-local-servers>
+- Cursor MCP docs: <https://docs.cursor.com/context/model-context-protocol>
+- Cursor MCP config docs: <https://docs.cursor.com/context/mcp>

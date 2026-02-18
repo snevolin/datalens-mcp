@@ -301,6 +301,44 @@ codex mcp add datalens \
 
 Примечание: если токен сохранён в конфиге напрямую, его надо обновлять после истечения.
 
+### Cursor
+
+Официальная документация:
+- Обзор Cursor MCP: <https://docs.cursor.com/context/model-context-protocol>
+- Конфигурация MCP (`mcp.json`): <https://docs.cursor.com/context/mcp>
+
+Настроить MCP можно в:
+- scope проекта: `.cursor/mcp.json` (шарится вместе с репозиторием)
+- user scope: `~/.cursor/mcp.json` (для всех проектов)
+
+Пример config:
+
+```json
+{
+  "mcpServers": {
+    "datalens": {
+      "type": "stdio",
+      "command": "/usr/local/bin/datalens-mcp",
+      "args": [],
+      "env": {
+        "DATALENS_ORG_ID": "<your_org_id>",
+        "YC_IAM_TOKEN": "<your_token>"
+      }
+    }
+  }
+}
+```
+
+Для Windows укажите в `command` путь к `.exe`, например:
+`C:\\Program Files\\datalens-mcp\\datalens-mcp.exe`
+
+Проверка в Cursor Agent (опционально):
+
+```bash
+cursor-agent mcp list
+cursor-agent mcp list-tools datalens
+```
+
 ### Claude Code (CLI)
 
 Официальная документация: <https://docs.anthropic.com/en/docs/claude-code/mcp>
@@ -385,3 +423,5 @@ Apache-2.0 (см. `LICENSE`).
 - IAM: получить токен через CLI (`yc iam create-token`): <https://yandex.cloud/ru/docs/iam/cli-ref/create-token>
 - Документация Claude Code MCP: <https://docs.anthropic.com/en/docs/claude-code/mcp>
 - Гайд по подключению local server (flow Claude Desktop): <https://modelcontextprotocol.io/docs/develop/connect-local-servers>
+- Документация Cursor MCP: <https://docs.cursor.com/context/model-context-protocol>
+- Документация Cursor MCP config: <https://docs.cursor.com/context/mcp>
