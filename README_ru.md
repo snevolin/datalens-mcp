@@ -16,7 +16,8 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
    - [Windows (MSI или ZIP)](#install-windows)
    - [Сборка из исходников](#install-build-from-source)
 2. Подключите его к тем агентам, которыми пользуетесь:
-   - [Codex CLI / VS Code Codex Extension](#connect-codex)
+   - [Codex CLI](#connect-codex-cli)
+   - [VS Code Codex Extension](#connect-codex-vscode)
    - [Cursor](#connect-cursor)
    - [Claude Code (CLI)](#connect-claude-code)
    - [Claude Desktop](#connect-claude-desktop)
@@ -93,7 +94,7 @@ Public API DataLens требует auth-заголовки и ID организ�
   - `x-dl-api-version`
   - auth-заголовок (`x-dl-auth-token`; этот сервер также отправляет `x-yacloud-subjecttoken`)
 
-Выберите один путь получения токена: раздел 2 (`yc` CLI), раздел 3 (OAuth -> IAM) или раздел 4 (service account).  
+Выберите один путь получения токена: раздел 2 (`yc` CLI), раздел 3 (OAuth -> IAM) или [раздел 4](#auth-service-account) (service account).  
 Во всех вариантах в итоге нужен IAM-токен в `YC_IAM_TOKEN` (или `DATALENS_IAM_TOKEN`).
 
 ### 1. Получить ID организации DataLens
@@ -164,6 +165,7 @@ $env:YC_IAM_TOKEN = (Invoke-RestMethod -Method 'POST' -Uri 'https://iam.api.clou
 - Для этого сервера всегда используйте IAM-токен в `YC_IAM_TOKEN` (или `DATALENS_IAM_TOKEN`).
 - IAM-токены истекают (до 12 часов). Обновляйте токен после истечения.
 
+<a id="auth-service-account"></a>
 ### 4. Путь для автоматизации (service account + key)
 
 Официальная документация:
@@ -343,13 +345,24 @@ datalens-mcp.exe
 <a id="connect-mcp"></a>
 ## Подключение как MCP-сервер
 
-<a id="connect-codex"></a>
-### Codex CLI / VS Code Codex Extension
+Используйте путь к бинарнику из вашего способа установки:
+- установка RPM/DEB: `/usr/bin/datalens-mcp`
+- установка из tar.gz/вручную: `/usr/local/bin/datalens-mcp`
 
-Добавить сервер:
+<a id="connect-codex"></a>
+### Codex
+
+<a id="connect-codex-cli"></a>
+#### Codex CLI
+
+Рекомендуемый вариант для Codex CLI и VS Code Codex Extension: сразу задать env-значения в MCP-конфиге при добавлении сервера.
 
 ```bash
-codex mcp add datalens -- /usr/local/bin/datalens-mcp
+codex mcp remove datalens
+codex mcp add datalens \
+  --env DATALENS_ORG_ID=<your_org_id> \
+  --env YC_IAM_TOKEN=<your_token> \
+  -- <path-to-datalens-mcp>
 ```
 
 Проверка:
@@ -359,17 +372,68 @@ codex mcp list
 codex mcp get datalens --json
 ```
 
-Если среда Codex не наследует shell-переменные, добавьте env-значения явно:
+Альтернатива только для CLI (переменные сессии): задайте ключи в той же shell-сессии, где запускаете `codex`:
+
+Linux/macOS:
+
+```bash
+export DATALENS_ORG_ID="<your_org_id>"
+export YC_IAM_TOKEN="$(yc iam create-token)"
+```
+
+Windows (PowerShell):
+
+```powershell
+$env:DATALENS_ORG_ID = "<your_org_id>"
+$env:YC_IAM_TOKEN = yc iam create-token
+```
+
+Добавить сервер:
+
+```bash
+codex mcp add datalens -- <path-to-datalens-mcp>
+```
+Этот вариант может не работать в IDE-окружениях, которые не наследуют переменные shell.
+
+Примечание: если токен сохранён в конфиге напрямую, его надо обновлять после истечения. Для длительной работы лучше использовать сценарий service account с автоматическим обновлением токена (см. [раздел 4](#auth-service-account)).
+
+<a id="connect-codex-vscode"></a>
+#### VS Code Codex Extension
+
+Официальная документация:
+- Настройка Codex MCP: <https://developers.openai.com/codex/mcp>
+
+Настройка MCP в extension использует тот же конфиг Codex, что и CLI.
+
+1. В UI extension откройте панель Codex, нажмите иконку шестерёнки и выберите **MCP settings -> Open config.toml**.
+2. Выберите scope:
+   - user scope: `~/.codex/config.toml`
+   - scope проекта: `.codex/config.toml` (только trusted projects)
+3. Добавьте в конфиг (замените плейсхолдеры):
+
+```toml
+[mcp_servers.datalens]
+command = "<path-to-datalens-mcp>"
+args = []
+
+[mcp_servers.datalens.env]
+DATALENS_ORG_ID = "<your_org_id>"
+YC_IAM_TOKEN = "<your_token>"
+```
+
+Для Windows укажите в `command` путь к `.exe`, например:
+`C:\\Program Files\\datalens-mcp\\datalens-mcp.exe`
+
+4. Сохраните `config.toml` и перезапустите VS Code, если MCP-сервер не появился сразу.
+5. Эквивалентная настройка через терминал в VS Code:
 
 ```bash
 codex mcp remove datalens
 codex mcp add datalens \
   --env DATALENS_ORG_ID=<your_org_id> \
   --env YC_IAM_TOKEN=<your_token> \
-  -- /usr/local/bin/datalens-mcp
+  -- <path-to-datalens-mcp>
 ```
-
-Примечание: если токен сохранён в конфиге напрямую, его надо обновлять после истечения.
 
 <a id="connect-cursor"></a>
 ### Cursor
@@ -390,7 +454,7 @@ codex mcp add datalens \
   "mcpServers": {
     "datalens": {
       "type": "stdio",
-      "command": "/usr/local/bin/datalens-mcp",
+      "command": "<path-to-datalens-mcp>",
       "args": [],
       "env": {
         "DATALENS_ORG_ID": "<your_org_id>",
@@ -419,7 +483,7 @@ cursor-agent mcp list-tools datalens
 Добавить сервер:
 
 ```bash
-claude mcp add datalens -- /usr/local/bin/datalens-mcp
+claude mcp add datalens -- <path-to-datalens-mcp>
 ```
 
 При необходимости можно передать env-значения явно:
@@ -428,7 +492,7 @@ claude mcp add datalens -- /usr/local/bin/datalens-mcp
 claude mcp add datalens \
   --env DATALENS_ORG_ID=<your_org_id> \
   --env YC_IAM_TOKEN=<your_token> \
-  -- /usr/local/bin/datalens-mcp
+  -- <path-to-datalens-mcp>
 ```
 
 <a id="connect-claude-desktop"></a>
@@ -454,7 +518,7 @@ claude mcp add datalens \
 {
   "mcpServers": {
     "datalens": {
-      "command": "/usr/local/bin/datalens-mcp",
+      "command": "<path-to-datalens-mcp>",
       "args": [],
       "env": {
         "DATALENS_ORG_ID": "<your_org_id>",
@@ -520,7 +584,7 @@ claude mcp add datalens \
 ## Примечания
 
 - В документации API встречаются оба домена `api.datalens.tech` и `api.datalens.yandex.net`; сервер по умолчанию использует `api.datalens.tech`, но базовый URL можно переопределить.
-- Для long-running setup лучше использовать flow с service account и автоматическим обновлением токенов.
+- Для длительной работы лучше использовать сценарий service account с автоматическим обновлением токена (см. [раздел 4](#auth-service-account)).
 
 ## Лицензия
 
@@ -538,6 +602,7 @@ Apache-2.0 (см. `LICENSE`).
 - IAM: получить токен аккаунта из OAuth-токена: <https://yandex.cloud/ru/docs/iam/operations/iam-token/create>
 - IAM API: `IamToken/create`: <https://yandex.cloud/ru/docs/iam/api-ref/IamToken/create>
 - IAM: получить токен через CLI (`yc iam create-token`): <https://yandex.cloud/ru/docs/iam/cli-ref/create-token>
+- Документация Codex MCP: <https://developers.openai.com/codex/mcp>
 - Документация Claude Code MCP: <https://docs.anthropic.com/en/docs/claude-code/mcp>
 - Гайд по подключению local server (flow Claude Desktop): <https://modelcontextprotocol.io/docs/develop/connect-local-servers>
 - Документация Cursor MCP: <https://docs.cursor.com/context/model-context-protocol>

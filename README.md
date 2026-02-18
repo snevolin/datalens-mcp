@@ -16,7 +16,8 @@ Where to start with `datalens-mcp`:
    - [Windows (MSI or ZIP)](#install-windows)
    - [Build from source](#install-build-from-source)
 2. Connect it to the agents you use:
-   - [Codex CLI / VS Code Codex Extension](#connect-codex)
+   - [Codex CLI](#connect-codex-cli)
+   - [VS Code Codex Extension](#connect-codex-vscode)
    - [Cursor](#connect-cursor)
    - [Claude Code (CLI)](#connect-claude-code)
    - [Claude Desktop](#connect-claude-desktop)
@@ -93,7 +94,7 @@ From Yandex docs:
   - `x-dl-api-version`
   - auth token header (`x-dl-auth-token`; this server also sends `x-yacloud-subjecttoken`)
 
-Choose one token path: section 2 (`yc` CLI), section 3 (OAuth -> IAM), or section 4 (service account).  
+Choose one token path: section 2 (`yc` CLI), section 3 (OAuth -> IAM), or [section 4](#auth-service-account) (service account).  
 All of them must end with an IAM token in `YC_IAM_TOKEN` (or `DATALENS_IAM_TOKEN`).
 
 ### 1. Get Your DataLens Organization ID
@@ -164,6 +165,7 @@ Important:
 - For this server, always use the resulting IAM token in `YC_IAM_TOKEN` (or `DATALENS_IAM_TOKEN`).
 - IAM tokens expire (up to 12 hours). Refresh when expired.
 
+<a id="auth-service-account"></a>
 ### 4. Automation-Friendly Path (Service Account + Key)
 
 Official docs:
@@ -343,13 +345,24 @@ datalens-mcp.exe
 <a id="connect-mcp"></a>
 ## Connect as MCP Server
 
-<a id="connect-codex"></a>
-### Codex CLI / VS Code Codex Extension
+Use the installed binary path for your platform/package:
+- RPM/DEB installs: `/usr/bin/datalens-mcp`
+- tar.gz/manual installs: `/usr/local/bin/datalens-mcp`
 
-Add server:
+<a id="connect-codex"></a>
+### Codex
+
+<a id="connect-codex-cli"></a>
+#### Codex CLI
+
+Recommended for both Codex CLI and VS Code Codex Extension: set env values explicitly in MCP config when adding the server.
 
 ```bash
-codex mcp add datalens -- /usr/local/bin/datalens-mcp
+codex mcp remove datalens
+codex mcp add datalens \
+  --env DATALENS_ORG_ID=<your_org_id> \
+  --env YC_IAM_TOKEN=<your_token> \
+  -- <path-to-datalens-mcp>
 ```
 
 Verify:
@@ -359,17 +372,68 @@ codex mcp list
 codex mcp get datalens --json
 ```
 
-If your Codex environment does not inherit shell variables, add explicit env values:
+CLI-only alternative (session env): set credentials in the same shell where you run `codex`:
+
+Linux/macOS:
+
+```bash
+export DATALENS_ORG_ID="<your_org_id>"
+export YC_IAM_TOKEN="$(yc iam create-token)"
+```
+
+Windows (PowerShell):
+
+```powershell
+$env:DATALENS_ORG_ID = "<your_org_id>"
+$env:YC_IAM_TOKEN = yc iam create-token
+```
+
+Add server:
+
+```bash
+codex mcp add datalens -- <path-to-datalens-mcp>
+```
+This may not work in IDE environments that do not inherit your shell variables.
+
+Note: if you store a direct token in config, you must update it after expiration. For long-running setups, prefer service-account token automation (see [section 4](#auth-service-account)).
+
+<a id="connect-codex-vscode"></a>
+#### VS Code Codex Extension
+
+Official docs:
+- Codex MCP setup: <https://developers.openai.com/codex/mcp>
+
+MCP setup in the extension uses the same Codex configuration as CLI.
+
+1. In the extension UI, open Codex panel, click gear icon, then choose **MCP settings -> Open config.toml**.
+2. Choose scope:
+   - user scope: `~/.codex/config.toml`
+   - project scope: `.codex/config.toml` (trusted projects only)
+3. Add this config (replace placeholders):
+
+```toml
+[mcp_servers.datalens]
+command = "<path-to-datalens-mcp>"
+args = []
+
+[mcp_servers.datalens.env]
+DATALENS_ORG_ID = "<your_org_id>"
+YC_IAM_TOKEN = "<your_token>"
+```
+
+For Windows, set `command` to your `.exe`, for example:
+`C:\\Program Files\\datalens-mcp\\datalens-mcp.exe`
+
+4. Save `config.toml` and restart VS Code if the MCP server is not shown immediately.
+5. Equivalent setup from a VS Code terminal:
 
 ```bash
 codex mcp remove datalens
 codex mcp add datalens \
   --env DATALENS_ORG_ID=<your_org_id> \
   --env YC_IAM_TOKEN=<your_token> \
-  -- /usr/local/bin/datalens-mcp
+  -- <path-to-datalens-mcp>
 ```
-
-Note: if you store a direct token in config, you must update it after expiration.
 
 <a id="connect-cursor"></a>
 ### Cursor
@@ -390,7 +454,7 @@ Example config:
   "mcpServers": {
     "datalens": {
       "type": "stdio",
-      "command": "/usr/local/bin/datalens-mcp",
+      "command": "<path-to-datalens-mcp>",
       "args": [],
       "env": {
         "DATALENS_ORG_ID": "<your_org_id>",
@@ -419,7 +483,7 @@ Official doc: <https://docs.anthropic.com/en/docs/claude-code/mcp>
 Add server:
 
 ```bash
-claude mcp add datalens -- /usr/local/bin/datalens-mcp
+claude mcp add datalens -- <path-to-datalens-mcp>
 ```
 
 If needed, pass explicit env values:
@@ -428,7 +492,7 @@ If needed, pass explicit env values:
 claude mcp add datalens \
   --env DATALENS_ORG_ID=<your_org_id> \
   --env YC_IAM_TOKEN=<your_token> \
-  -- /usr/local/bin/datalens-mcp
+  -- <path-to-datalens-mcp>
 ```
 
 <a id="connect-claude-desktop"></a>
@@ -454,7 +518,7 @@ Example config:
 {
   "mcpServers": {
     "datalens": {
-      "command": "/usr/local/bin/datalens-mcp",
+      "command": "<path-to-datalens-mcp>",
       "args": [],
       "env": {
         "DATALENS_ORG_ID": "<your_org_id>",
@@ -520,7 +584,7 @@ For dataset "<dataset_id>", list dashboards and charts that depend on it.
 ## Notes
 
 - API docs use both `api.datalens.tech` and `api.datalens.yandex.net` in different places; this server defaults to `api.datalens.tech` but lets you override base URL.
-- For long-running setups, prefer service-account-based token flow and rotation automation.
+- For long-running setups, prefer service-account-based token flow and rotation automation (see [section 4](#auth-service-account)).
 
 ## License
 
@@ -538,6 +602,7 @@ Apache-2.0 (see `LICENSE`).
 - IAM: create account token from OAuth token: <https://yandex.cloud/en/docs/iam/operations/iam-token/create>
 - IAM API: `IamToken/create`: <https://yandex.cloud/en/docs/iam/api-ref/IamToken/create>
 - IAM: create token via CLI (`yc iam create-token`): <https://yandex.cloud/en/docs/iam/cli-ref/create-token>
+- Codex MCP docs: <https://developers.openai.com/codex/mcp>
 - Claude Code MCP docs: <https://docs.anthropic.com/en/docs/claude-code/mcp>
 - MCP local server connection guide (Claude Desktop config flow): <https://modelcontextprotocol.io/docs/develop/connect-local-servers>
 - Cursor MCP docs: <https://docs.cursor.com/context/model-context-protocol>
