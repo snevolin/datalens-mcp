@@ -29,6 +29,9 @@ jobs:
       - name: Test
         run: cargo test --all-targets --all-features
 
+      - name: Integration test (method schema coverage)
+        run: cargo test --test method_schema_integration --all-features
+
   build-matrix:
     name: Build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
