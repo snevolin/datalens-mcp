@@ -775,6 +775,40 @@ fn init_tracing() {
         .init();
 }
 
+#[tokio::main]
+async fn main() -> Result<()> {
+    init_tracing();
+
+    let cfg = AppConfig::from_env();
+    info!(
+        base_url = %cfg.base_url,
+        api_version = %cfg.api_version,
+        "starting datalens-mcp server"
+    );
+
+    if cfg.org_id.is_none() {
+        warn!("DATALENS_ORG_ID is not set; tool calls will fail until it is configured");
+    }
+    if cfg.subject_token.is_none() {
+        warn!(
+            "YC_IAM_TOKEN / DATALENS_IAM_TOKEN is not set; tool calls will fail until it is configured"
+        );
+    }
+
+    let server = DataLensServer::new(cfg).context("failed to initialize server")?;
+    let service = server
+        .serve(stdio())
+        .await
+        .context("failed to start MCP stdio service")?;
+
+    service
+        .waiting()
+        .await
+        .context("MCP service terminated unexpectedly")?;
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -954,38 +988,4 @@ mod tests {
 
         assert_eq!(result.0, json!({"datasetId": "ds-1"}));
     }
-}
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    init_tracing();
-
-    let cfg = AppConfig::from_env();
-    info!(
-        base_url = %cfg.base_url,
-        api_version = %cfg.api_version,
-        "starting datalens-mcp server"
-    );
-
-    if cfg.org_id.is_none() {
-        warn!("DATALENS_ORG_ID is not set; tool calls will fail until it is configured");
-    }
-    if cfg.subject_token.is_none() {
-        warn!(
-            "YC_IAM_TOKEN / DATALENS_IAM_TOKEN is not set; tool calls will fail until it is configured"
-        );
-    }
-
-    let server = DataLensServer::new(cfg).context("failed to initialize server")?;
-    let service = server
-        .serve(stdio())
-        .await
-        .context("failed to start MCP stdio service")?;
-
-    service
-        .waiting()
-        .await
-        .context("MCP service terminated unexpectedly")?;
-
-    Ok(())
 }
