@@ -331,7 +331,8 @@ impl DataLensServer {
         &self,
         Parameters(args): Parameters<DatalensRpcArgs>,
     ) -> Result<ToolJson, McpError> {
-        self.call_rpc(&args.method, args.payload).await
+        let payload = normalize_json_value(args.payload, "payload")?;
+        self.call_rpc(&args.method, payload).await
     }
 
     #[tool(
@@ -432,13 +433,22 @@ impl DataLensServer {
         let mut payload = Map::new();
         payload.insert("path".to_owned(), Value::String(args.path));
         if let Some(created_by) = args.created_by {
-            payload.insert("createdBy".to_owned(), created_by);
+            payload.insert(
+                "createdBy".to_owned(),
+                normalize_json_value(created_by, "createdBy")?,
+            );
         }
         if let Some(order_by) = args.order_by {
-            payload.insert("orderBy".to_owned(), order_by);
+            payload.insert(
+                "orderBy".to_owned(),
+                normalize_json_value(order_by, "orderBy")?,
+            );
         }
         if let Some(filters) = args.filters {
-            payload.insert("filters".to_owned(), filters);
+            payload.insert(
+                "filters".to_owned(),
+                normalize_json_value(filters, "filters")?,
+            );
         }
         if let Some(page) = args.page {
             payload.insert("page".to_owned(), Value::Number(page));
@@ -476,13 +486,22 @@ impl DataLensServer {
             payload.insert("includeLinks".to_owned(), Value::Bool(include_links));
         }
         if let Some(filters) = args.filters {
-            payload.insert("filters".to_owned(), filters);
+            payload.insert(
+                "filters".to_owned(),
+                normalize_json_value(filters, "filters")?,
+            );
         }
         if let Some(order_by) = args.order_by {
-            payload.insert("orderBy".to_owned(), order_by);
+            payload.insert(
+                "orderBy".to_owned(),
+                normalize_json_value(order_by, "orderBy")?,
+            );
         }
         if let Some(created_by) = args.created_by {
-            payload.insert("createdBy".to_owned(), created_by);
+            payload.insert(
+                "createdBy".to_owned(),
+                normalize_json_value(created_by, "createdBy")?,
+            );
         }
         if let Some(page) = args.page {
             payload.insert("page".to_owned(), Value::Number(page));
@@ -506,7 +525,7 @@ impl DataLensServer {
             payload.insert("scope".to_owned(), Value::String(scope));
         }
         if let Some(ids) = args.ids {
-            payload.insert("ids".to_owned(), ids);
+            payload.insert("ids".to_owned(), normalize_json_value(ids, "ids")?);
         }
         extend_with_extra(&mut payload, args.extra);
 
@@ -625,7 +644,7 @@ impl DataLensServer {
     ) -> Result<ToolJson, McpError> {
         let mut payload = Map::new();
         payload.insert("connectionId".to_owned(), Value::String(args.connection_id));
-        payload.insert("data".to_owned(), args.data);
+        payload.insert("data".to_owned(), normalize_json_value(args.data, "data")?);
         extend_with_extra(&mut payload, args.extra);
 
         self.call_rpc("updateConnection", Value::Object(payload))
@@ -657,7 +676,10 @@ impl DataLensServer {
         Parameters(args): Parameters<CreateDashboardArgs>,
     ) -> Result<ToolJson, McpError> {
         let mut payload = Map::new();
-        payload.insert("entry".to_owned(), args.entry);
+        payload.insert(
+            "entry".to_owned(),
+            normalize_json_value(args.entry, "entry")?,
+        );
         payload.insert("mode".to_owned(), Value::String(args.mode));
         extend_with_extra(&mut payload, args.extra);
 
@@ -674,7 +696,10 @@ impl DataLensServer {
         Parameters(args): Parameters<UpdateDashboardArgs>,
     ) -> Result<ToolJson, McpError> {
         let mut payload = Map::new();
-        payload.insert("entry".to_owned(), args.entry);
+        payload.insert(
+            "entry".to_owned(),
+            normalize_json_value(args.entry, "entry")?,
+        );
         payload.insert("mode".to_owned(), Value::String(args.mode));
         extend_with_extra(&mut payload, args.extra);
 
@@ -710,9 +735,15 @@ impl DataLensServer {
         Parameters(args): Parameters<CreateDatasetArgs>,
     ) -> Result<ToolJson, McpError> {
         let mut payload = Map::new();
-        payload.insert("dataset".to_owned(), args.dataset);
+        payload.insert(
+            "dataset".to_owned(),
+            normalize_json_value(args.dataset, "dataset")?,
+        );
         if let Some(created_via) = args.created_via {
-            payload.insert("created_via".to_owned(), created_via);
+            payload.insert(
+                "created_via".to_owned(),
+                normalize_json_value(created_via, "created_via")?,
+            );
         }
         if let Some(dir_path) = args.dir_path {
             payload.insert("dir_path".to_owned(), Value::String(dir_path));
@@ -721,7 +752,10 @@ impl DataLensServer {
             payload.insert("name".to_owned(), Value::String(name));
         }
         if let Some(options) = args.options {
-            payload.insert("options".to_owned(), options);
+            payload.insert(
+                "options".to_owned(),
+                normalize_json_value(options, "options")?,
+            );
         }
         if let Some(preview) = args.preview {
             payload.insert("preview".to_owned(), Value::Bool(preview));
@@ -744,9 +778,8 @@ impl DataLensServer {
     ) -> Result<ToolJson, McpError> {
         let mut payload = Map::new();
         payload.insert("datasetId".to_owned(), Value::String(args.dataset_id));
-        if let Some(data) = args.data {
-            payload.insert("data".to_owned(), data);
-        }
+        let data = args.data.unwrap_or_else(|| Value::Object(Map::new()));
+        payload.insert("data".to_owned(), normalize_json_value(data, "data")?);
         extend_with_extra(&mut payload, args.extra);
 
         self.call_rpc("updateDataset", Value::Object(payload)).await
@@ -780,9 +813,8 @@ impl DataLensServer {
         if let Some(workbook_id) = args.workbook_id {
             payload.insert("workbookId".to_owned(), Value::String(workbook_id));
         }
-        if let Some(data) = args.data {
-            payload.insert("data".to_owned(), data);
-        }
+        let data = args.data.unwrap_or_else(|| Value::Object(Map::new()));
+        payload.insert("data".to_owned(), normalize_json_value(data, "data")?);
         extend_with_extra(&mut payload, args.extra);
 
         self.call_rpc("validateDataset", Value::Object(payload))
@@ -893,6 +925,24 @@ fn extend_with_extra(target: &mut Map<String, Value>, extra: BTreeMap<String, Va
     for (key, value) in extra {
         target.insert(key, value);
     }
+}
+
+fn normalize_json_value(value: Value, field_name: &str) -> Result<Value, McpError> {
+    let Value::String(raw) = value else {
+        return Ok(value);
+    };
+
+    let trimmed = raw.trim();
+    if !(trimmed.starts_with('{') || trimmed.starts_with('[')) {
+        return Ok(Value::String(raw));
+    }
+
+    serde_json::from_str::<Value>(trimmed).map_err(|error| {
+        McpError::invalid_params(
+            format!("field `{field_name}` must be valid JSON when passed as a string: {error}"),
+            None,
+        )
+    })
 }
 
 fn add_header(headers: &mut HeaderMap, key: &str, value: &str) -> Result<(), McpError> {
@@ -1070,6 +1120,20 @@ mod tests {
         let out = truncate_utf8(input, 5);
         assert!(out.starts_with("abc"));
         assert!(!out.contains('\u{fffd}'));
+    }
+
+    #[test]
+    fn normalize_json_value_parses_stringified_object() {
+        let value = normalize_json_value(Value::String(r#"{"a":1}"#.to_owned()), "payload")
+            .expect("must parse stringified JSON object");
+        assert_eq!(value, json!({"a": 1}));
+    }
+
+    #[test]
+    fn normalize_json_value_keeps_plain_string() {
+        let value = normalize_json_value(Value::String("plain-text".to_owned()), "payload")
+            .expect("plain string must be preserved");
+        assert_eq!(value, Value::String("plain-text".to_owned()));
     }
 
     #[test]
@@ -1256,5 +1320,142 @@ mod tests {
             .expect("tool call must succeed");
 
         assert_eq!(Value::Object(result.0), json!({"datasetId": "ds-1"}));
+    }
+
+    #[tokio::test]
+    async fn datalens_rpc_parses_stringified_json_payload() {
+        let mock_server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/rpc/listDirectory"))
+            .and(body_json(json!({ "path": "/" })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"entries": []})))
+            .mount(&mock_server)
+            .await;
+
+        let server = test_server(mock_server.uri());
+        let result = server
+            .datalens_rpc(Parameters(DatalensRpcArgs {
+                method: "listDirectory".to_owned(),
+                payload: Value::String(r#"{"path":"/"}"#.to_owned()),
+            }))
+            .await
+            .expect("stringified payload must be parsed and sent as JSON object");
+
+        assert_eq!(Value::Object(result.0), json!({"entries": []}));
+    }
+
+    #[tokio::test]
+    async fn datalens_create_dashboard_parses_stringified_entry() {
+        let mock_server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/rpc/createDashboard"))
+            .and(body_json(json!({
+                "entry": {"name": "dash"},
+                "mode": "save"
+            })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"dashboardId": "d-1"})))
+            .mount(&mock_server)
+            .await;
+
+        let server = test_server(mock_server.uri());
+        let result = server
+            .datalens_create_dashboard(Parameters(CreateDashboardArgs {
+                entry: Value::String(r#"{"name":"dash"}"#.to_owned()),
+                mode: "save".to_owned(),
+                extra: BTreeMap::new(),
+            }))
+            .await
+            .expect("stringified entry must be parsed to object");
+
+        assert_eq!(Value::Object(result.0), json!({"dashboardId": "d-1"}));
+    }
+
+    #[tokio::test]
+    async fn datalens_create_dataset_parses_stringified_dataset() {
+        let mock_server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/rpc/createDataset"))
+            .and(body_json(json!({
+                "dataset": {},
+                "workbook_id": "wb-1"
+            })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"datasetId": "ds-1"})))
+            .mount(&mock_server)
+            .await;
+
+        let server = test_server(mock_server.uri());
+        let result = server
+            .datalens_create_dataset(Parameters(CreateDatasetArgs {
+                dataset: Value::String("{}".to_owned()),
+                created_via: None,
+                dir_path: None,
+                name: None,
+                options: None,
+                preview: None,
+                workbook_id: Some("wb-1".to_owned()),
+                extra: BTreeMap::new(),
+            }))
+            .await
+            .expect("stringified dataset must be parsed to object");
+
+        assert_eq!(Value::Object(result.0), json!({"datasetId": "ds-1"}));
+    }
+
+    #[tokio::test]
+    async fn datalens_update_dataset_defaults_data_to_empty_object() {
+        let mock_server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/rpc/updateDataset"))
+            .and(body_json(json!({
+                "datasetId": "ds-1",
+                "data": {}
+            })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"ok": true})))
+            .mount(&mock_server)
+            .await;
+
+        let server = test_server(mock_server.uri());
+        let result = server
+            .datalens_update_dataset(Parameters(UpdateDatasetArgs {
+                dataset_id: "ds-1".to_owned(),
+                data: None,
+                extra: BTreeMap::new(),
+            }))
+            .await
+            .expect("missing data must default to {}");
+
+        assert_eq!(Value::Object(result.0), json!({"ok": true}));
+    }
+
+    #[tokio::test]
+    async fn datalens_validate_dataset_defaults_data_to_empty_object() {
+        let mock_server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/rpc/validateDataset"))
+            .and(body_json(json!({
+                "datasetId": "ds-1",
+                "data": {}
+            })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"ok": true})))
+            .mount(&mock_server)
+            .await;
+
+        let server = test_server(mock_server.uri());
+        let result = server
+            .datalens_validate_dataset(Parameters(ValidateDatasetArgs {
+                dataset_id: "ds-1".to_owned(),
+                workbook_id: None,
+                data: None,
+                extra: BTreeMap::new(),
+            }))
+            .await
+            .expect("missing data must default to {}");
+
+        assert_eq!(Value::Object(result.0), json!({"ok": true}));
     }
 }
