@@ -10,7 +10,7 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
 - Yandex и DataLens являются товарными знаками соответствующих правообладателей.
 - Название `datalens-mcp` используется только для обозначения совместимости с API DataLens.
 
-## Поддерживаемые Tools
+## Поддерживаемые инструменты
 
 - Служебные:
   - `datalens_list_methods`: возвращает известные методы DataLens API, соответствующие MCP tools, категории и метаданные снимка.
@@ -43,7 +43,7 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
   - `datalens_get_audit_entries_updates` -> `getAuditEntriesUpdates`
   - `datalens_list_directory` -> `listDirectory`
 
-## Покрытие API (Снимок)
+## Покрытие API
 
 Дата снимка покрытия: **17 февраля 2026**.
 
@@ -63,7 +63,7 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
 - ID организации DataLens
 - IAM-токен Yandex Cloud (или OAuth-токен, который принимает DataLens)
 
-## Получение Доступа к API (Подробно)
+## Получение доступа к API
 
 Public API DataLens требует auth-заголовки и ID организации.
 
@@ -74,7 +74,7 @@ Public API DataLens требует auth-заголовки и ID организ�
   - `x-dl-api-version`
   - auth-заголовок (`x-dl-auth-token`; этот сервер также отправляет `x-yacloud-subjecttoken`)
 
-### 1. Получить ID Организации DataLens (Путь по кнопкам в UI)
+### 1. Получить ID организации DataLens
 
 Официальная документация: <https://yandex.cloud/ru/docs/organization/operations/organization-get-id>
 
@@ -85,7 +85,7 @@ Public API DataLens требует auth-заголовки и ID организ�
 
 Это значение используйте как `DATALENS_ORG_ID`.
 
-### 2. Самый Быстрый Способ Получить Токен (для local/dev)
+### 2. Самый быстрый способ получить токен (для local/dev)
 
 Официальная документация:
 - Установка CLI: <https://yandex.cloud/ru/docs/cli/quickstart>
@@ -102,7 +102,7 @@ yc iam create-token
 
 Важно: IAM-токены имеют срок действия. Обновляйте токен после истечения.
 
-### 3. Путь для Автоматизации (Service Account + Key, Путь по кнопкам в UI)
+### 3. Путь для автоматизации (service account + key)
 
 Официальная документация:
 - Создание service account: <https://yandex.cloud/ru/docs/iam/quickstart-sa>
@@ -124,11 +124,11 @@ yc iam create-token
 - `DATALENS_ORG_ID`
 - `YC_IAM_TOKEN` или `DATALENS_IAM_TOKEN`
 
-### 4. Где Применяются Эти Ключи
+### 4. Где применяются эти ключи
 
 В разделах установки ниже есть платформенные команды для настройки этих значений в Linux, macOS и Windows.
 
-## Установка по Платформам
+## Установка по платформам
 
 Артефакты сборок публикуются в GitHub Releases:
 <https://github.com/snevolin/datalens-mcp/releases>
@@ -242,7 +242,7 @@ setx DATALENS_ORG_ID "<your_org_id>"
 $env:YC_IAM_TOKEN = yc iam create-token
 ```
 
-### Сборка из Исходников (Любая Платформа)
+### Сборка из исходников (любая платформа)
 
 ```bash
 git clone https://github.com/snevolin/datalens-mcp.git
@@ -254,7 +254,7 @@ cargo build --release
 - Linux/macOS: `target/release/datalens-mcp`
 - Windows: `target\release\datalens-mcp.exe`
 
-## Ручной Запуск
+## Ручной запуск
 
 Linux/macOS:
 
@@ -272,7 +272,7 @@ $env:YC_IAM_TOKEN = yc iam create-token
 datalens-mcp.exe
 ```
 
-## Подключение как MCP Server
+## Подключение как MCP-сервер
 
 ### Codex CLI / VS Code Codex Extension
 
@@ -356,7 +356,7 @@ claude mcp add datalens \
 Для Windows укажите в `command` путь к `.exe`, например:
 `C:\\Program Files\\datalens-mcp\\datalens-mcp.exe`
 
-## Переменные Окружения
+## Переменные окружения
 
 - `DATALENS_ORG_ID` (обязательно)
 - `YC_IAM_TOKEN` или `DATALENS_IAM_TOKEN` (обязательно)
@@ -373,7 +373,7 @@ claude mcp add datalens \
 
 Apache-2.0 (см. `LICENSE`).
 
-## Основные Источники
+## Основные источники
 
 - Старт Public API DataLens: <https://yandex.cloud/ru/docs/datalens/operations/api-start>
 - Индекс OpenAPI DataLens: <https://yandex.cloud/ru/docs/datalens/openapi-ref/>

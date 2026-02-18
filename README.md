@@ -43,7 +43,7 @@ This server uses the MCP `stdio` transport and exposes DataLens RPC methods as M
   - `datalens_get_audit_entries_updates` -> `getAuditEntriesUpdates`
   - `datalens_list_directory` -> `listDirectory`
 
-## API Coverage (Snapshot)
+## API Coverage
 
 Coverage snapshot date: **February 17, 2026**.
 
@@ -63,7 +63,7 @@ Reference docs used for this snapshot include DataLens API pages updated up to *
 - DataLens organization ID
 - Yandex Cloud IAM token (or OAuth token accepted by DataLens)
 
-## Get API Credentials (Detailed)
+## Get API Credentials
 
 DataLens Public API requires authentication headers and an organization ID.
 
@@ -74,7 +74,7 @@ From Yandex docs:
   - `x-dl-api-version`
   - auth token header (`x-dl-auth-token`; this server also sends `x-yacloud-subjecttoken`)
 
-### 1. Get Your DataLens Organization ID (UI Click Path)
+### 1. Get Your DataLens Organization ID
 
 Official doc: <https://yandex.cloud/en/docs/organization/operations/organization-get-id>
 
@@ -102,7 +102,7 @@ yc iam create-token
 
 Important: IAM tokens expire. Refresh when expired.
 
-### 3. Automation-Friendly Path (Service Account + Key, UI Click Path)
+### 3. Automation-Friendly Path (Service Account + Key)
 
 Official docs:
 - Create service account: <https://yandex.cloud/en/docs/iam/quickstart-sa>
