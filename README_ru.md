@@ -6,7 +6,7 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
 
 ## Быстрый старт
 
-Чтобы начать пользоваться `datalens-mcp`, соблюдайте такой порядок:
+С чего начать работу с `datalens-mcp`:
 
 1. Установите MCP-сервер:
    - [Linux (x86_64, tar.gz)](#install-linux-targz)

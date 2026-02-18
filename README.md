@@ -6,7 +6,7 @@ This server uses the MCP `stdio` transport and exposes DataLens RPC methods as M
 
 ## Quick Start
 
-To start using `datalens-mcp`, follow this order:
+Where to start with `datalens-mcp`:
 
 1. Install the MCP server:
    - [Linux (x86_64, tar.gz)](#install-linux-targz)
