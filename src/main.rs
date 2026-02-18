@@ -225,14 +225,6 @@ struct DeleteConnectionArgs {
 }
 
 #[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct CreateDashboardArgs {
-    entry: Value,
-    mode: String,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
 struct UpdateDashboardArgs {
     entry: Value,
     mode: String,
@@ -664,26 +656,6 @@ impl DataLensServer {
         extend_with_extra(&mut payload, args.extra);
 
         self.call_rpc("deleteConnection", Value::Object(payload))
-            .await
-    }
-
-    #[tool(
-        name = "datalens_create_dashboard",
-        description = "Call createDashboard. Required: entry, mode (`save` or `publish`)."
-    )]
-    async fn datalens_create_dashboard(
-        &self,
-        Parameters(args): Parameters<CreateDashboardArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert(
-            "entry".to_owned(),
-            normalize_json_value(args.entry, "entry")?,
-        );
-        payload.insert("mode".to_owned(), Value::String(args.mode));
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("createDashboard", Value::Object(payload))
             .await
     }
 
@@ -1343,33 +1315,6 @@ mod tests {
             .expect("stringified payload must be parsed and sent as JSON object");
 
         assert_eq!(Value::Object(result.0), json!({"entries": []}));
-    }
-
-    #[tokio::test]
-    async fn datalens_create_dashboard_parses_stringified_entry() {
-        let mock_server = MockServer::start().await;
-
-        Mock::given(method("POST"))
-            .and(path("/rpc/createDashboard"))
-            .and(body_json(json!({
-                "entry": {"name": "dash"},
-                "mode": "save"
-            })))
-            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"dashboardId": "d-1"})))
-            .mount(&mock_server)
-            .await;
-
-        let server = test_server(mock_server.uri());
-        let result = server
-            .datalens_create_dashboard(Parameters(CreateDashboardArgs {
-                entry: Value::String(r#"{"name":"dash"}"#.to_owned()),
-                mode: "save".to_owned(),
-                extra: BTreeMap::new(),
-            }))
-            .await
-            .expect("stringified entry must be parsed to object");
-
-        assert_eq!(Value::Object(result.0), json!({"dashboardId": "d-1"}));
     }
 
     #[tokio::test]

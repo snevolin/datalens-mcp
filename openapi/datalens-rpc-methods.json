@@ -397,8 +397,8 @@
       "method": "createDashboard",
       "category": "write",
       "experimental": true,
-      "typedTool": "datalens_create_dashboard",
-      "invokeWith": "datalens_create_dashboard",
+      "typedTool": null,
+      "invokeWith": "datalens_rpc",
       "summary": "🚧 [Experimental] Create dashboard",
       "description": null,
       "requestSchema": {

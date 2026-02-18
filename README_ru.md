@@ -42,7 +42,6 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
   - `datalens_update_connection` -> `updateConnection`
   - `datalens_delete_connection` -> `deleteConnection`
   - `datalens_get_dashboard` -> `getDashboard`
-  - `datalens_create_dashboard` -> `createDashboard`
   - `datalens_update_dashboard` -> `updateDashboard`
   - `datalens_delete_dashboard` -> `deleteDashboard`
   - `datalens_get_dataset` -> `getDataset`
