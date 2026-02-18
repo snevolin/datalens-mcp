@@ -111,12 +111,15 @@ jobs:
     runs-on: ubuntu-latest
     container: fedora:41
     steps:
+      - name: Install git (required by actions/checkout and git archive)
+        run: dnf -y install git
+
       - uses: actions/checkout@v4
 
       - name: Install build dependencies
         run: |
           dnf -y update
-          dnf -y install rust cargo rpm-build git
+          dnf -y install rust cargo rpm-build
 
       - name: Build RPM
         shell: bash
