@@ -126,6 +126,8 @@ jobs:
         run: |
           set -euo pipefail
 
+          git config --global --add safe.directory "$(pwd)"
+
           VERSION=$(grep -m1 '^version = ' Cargo.toml | sed -E 's/version = "([^"]+)"/\1/')
           TOPDIR="$(pwd)/rpmbuild"
 
