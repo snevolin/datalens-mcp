@@ -33,9 +33,10 @@ Where to start with `datalens-mcp`:
 ## Supported Tools
 
 - Utility:
-  - `datalens_list_methods`: returns known DataLens API methods, mapped MCP tool names, categories, and snapshot metadata.
+  - `datalens_list_methods`: returns the full DataLens RPC method catalog (currently 60 methods), mapped MCP tool names, categories, and snapshot metadata.
+  - `datalens_get_method_schema`: returns request schema and invocation hints for one catalog method.
   - `datalens_rpc`: generic fallback for any method under `/rpc/{method}`.
-- Typed wrappers (method-specific):
+- Typed wrappers (core high-frequency methods):
   - `datalens_get_connection` -> `getConnection`
   - `datalens_create_connection` -> `createConnection`
   - `datalens_update_connection` -> `updateConnection`
@@ -49,31 +50,24 @@ Where to start with `datalens-mcp`:
   - `datalens_update_dataset` -> `updateDataset`
   - `datalens_delete_dataset` -> `deleteDataset`
   - `datalens_validate_dataset` -> `validateDataset`
-  - `datalens_get_entries_relations` -> `getEntriesRelations`
   - `datalens_get_entries` -> `getEntries`
-  - `datalens_get_ql_chart` -> `getQLChart`
-  - `datalens_delete_ql_chart` -> `deleteQLChart`
-  - `datalens_get_wizard_chart` -> `getWizardChart`
-  - `datalens_delete_wizard_chart` -> `deleteWizardChart`
-  - `datalens_get_editor_chart` -> `getEditorChart`
-  - `datalens_delete_editor_chart` -> `deleteEditorChart`
-  - `datalens_create_editor_chart` -> `createEditorChart`
-  - `datalens_update_editor_chart` -> `updateEditorChart`
-  - `datalens_get_entries_permissions` -> `getEntriesPermissions`
-  - `datalens_get_audit_entries_updates` -> `getAuditEntriesUpdates`
   - `datalens_list_directory` -> `listDirectory`
 
 ## API Coverage
 
-Coverage snapshot date: **February 17, 2026**.
+Coverage snapshot date: **February 18, 2026**.
 
-- Typed coverage:
-  - This server includes typed wrappers for all DataLens methods listed in the API overview snapshot (`/openapi-ref/`) at the time of implementation.
-  - `datalens_list_methods` exposes that same catalog at runtime to MCP agents.
+- Full method catalog:
+  - `datalens_list_methods` exposes the full RPC catalog from the OpenAPI snapshot (`60` methods at this date).
+  - `datalens_get_method_schema` returns request schema and invocation metadata for each method.
+- Typed coverage policy:
+  - This server keeps typed wrappers for core high-frequency operations only.
+  - This is intentional: it keeps MCP `tools/list` smaller and saves model context window.
 - Forward compatibility:
-  - `datalens_rpc` can call methods that may appear later in DataLens API before a dedicated wrapper is added.
+  - `datalens_rpc` can call all catalog methods, including methods without dedicated typed wrappers.
+  - `datalens_rpc` can also call methods that may appear later in DataLens API before a dedicated wrapper is added.
 - Experimental methods:
-  - Methods marked as experimental in DataLens docs are exposed as tools too. Their behavior can change upstream.
+  - Methods marked as experimental in DataLens docs are still discoverable in the catalog. Their behavior can change upstream.
 
 Reference docs used for this snapshot include DataLens API pages updated up to **February 4, 2026** (API start) and method pages updated between **June 26, 2025** and **January 16, 2026**.
 

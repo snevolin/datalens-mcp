@@ -33,9 +33,10 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
 ## Поддерживаемые инструменты
 
 - Служебные:
-  - `datalens_list_methods`: возвращает известные методы DataLens API, соответствующие MCP tools, категории и метаданные снимка.
+  - `datalens_list_methods`: возвращает полный каталог RPC-методов DataLens (сейчас 60 методов), соответствующие MCP tools, категории и метаданные снимка.
+  - `datalens_get_method_schema`: возвращает схему параметров и подсказки по вызову для одного метода из каталога.
   - `datalens_rpc`: универсальный fallback для любого метода по пути `/rpc/{method}`.
-- Типизированные обёртки (method-specific):
+- Типизированные обёртки (основные high-frequency методы):
   - `datalens_get_connection` -> `getConnection`
   - `datalens_create_connection` -> `createConnection`
   - `datalens_update_connection` -> `updateConnection`
@@ -49,31 +50,24 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
   - `datalens_update_dataset` -> `updateDataset`
   - `datalens_delete_dataset` -> `deleteDataset`
   - `datalens_validate_dataset` -> `validateDataset`
-  - `datalens_get_entries_relations` -> `getEntriesRelations`
   - `datalens_get_entries` -> `getEntries`
-  - `datalens_get_ql_chart` -> `getQLChart`
-  - `datalens_delete_ql_chart` -> `deleteQLChart`
-  - `datalens_get_wizard_chart` -> `getWizardChart`
-  - `datalens_delete_wizard_chart` -> `deleteWizardChart`
-  - `datalens_get_editor_chart` -> `getEditorChart`
-  - `datalens_delete_editor_chart` -> `deleteEditorChart`
-  - `datalens_create_editor_chart` -> `createEditorChart`
-  - `datalens_update_editor_chart` -> `updateEditorChart`
-  - `datalens_get_entries_permissions` -> `getEntriesPermissions`
-  - `datalens_get_audit_entries_updates` -> `getAuditEntriesUpdates`
   - `datalens_list_directory` -> `listDirectory`
 
 ## Покрытие API
 
-Дата снимка покрытия: **17 февраля 2026**.
+Дата снимка покрытия: **18 февраля 2026**.
 
-- Типизированное покрытие:
-  - Сервер содержит типизированные обёртки для всех методов DataLens из snapshot API overview (`/openapi-ref/`) на момент реализации.
-  - `datalens_list_methods` отдаёт этот же каталог во время работы MCP-сервера.
+- Полный каталог методов:
+  - `datalens_list_methods` отдаёт полный RPC-каталог из snapshot OpenAPI (`60` методов на эту дату).
+  - `datalens_get_method_schema` возвращает схему параметров и метаданные вызова для каждого метода.
+- Политика типизированного покрытия:
+  - Сервер оставляет типизированные обёртки только для основных high-frequency операций.
+  - Это сделано специально: чтобы уменьшить размер `tools/list` и экономить окно контекста модели.
 - Forward compatibility:
-  - `datalens_rpc` может вызывать методы, которые появятся позже в DataLens API до добавления отдельной обёртки.
+  - `datalens_rpc` может вызывать все методы из каталога, в том числе без отдельной typed-обёртки.
+  - `datalens_rpc` также может вызывать методы, которые появятся позже в DataLens API до добавления отдельной обёртки.
 - Экспериментальные методы:
-  - Методы, отмеченные в документации DataLens как experimental, также доступны как tools. Их поведение может измениться upstream.
+  - Методы, отмеченные в документации DataLens как experimental, по-прежнему видны в каталоге. Их поведение может измениться upstream.
 
 Для этого снимка использованы страницы документации DataLens API, обновлённые до **4 февраля 2026** (старт API), и страницы методов, обновлённые в период **26 июня 2025** — **16 января 2026**.
 
