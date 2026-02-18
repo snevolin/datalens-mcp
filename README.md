@@ -405,6 +405,27 @@ Official docs:
 
 MCP setup in the extension uses the same Codex configuration as CLI.
 
+Option A: configure via the UI form (**Connect to a custom MCP**).
+
+1. Open Codex panel and click the gear icon.
+2. Open **MCP settings -> Open MCP settings**.
+3. In **MCP servers**, click **Add server** in the **Custom servers** section.
+4. In the **Connect to a custom MCP** form, fill fields:
+   - **Name**: `datalens`
+   - **Transport**: `STDIO`
+   - **Command to launch**: `<path-to-datalens-mcp>`
+   - **Arguments**: leave empty
+   - **Credentials mode**: use one of these two options:
+     - **Store values in this form** (recommended): set `Environment variables` to `DATALENS_ORG_ID=<your_org_id>` and `YC_IAM_TOKEN=<your_token>`; leave `Environment variable passthrough` empty
+     - **Pass through existing VS Code env**: leave `Environment variables` empty; in `Environment variable passthrough` add variable names only: `DATALENS_ORG_ID` and `YC_IAM_TOKEN` (or `DATALENS_IAM_TOKEN`). Use this when variables are already managed outside the form (for example via shell profile, `direnv`, devcontainer/CI env, secret manager) and you do not want to store token values in extension settings
+   - **Working directory**: optional, default is fine
+5. Click **Save** and restart VS Code if the MCP server is not shown immediately.
+
+For Windows, set **Command to launch** to your `.exe`, for example:
+`C:\\Program Files\\datalens-mcp\\datalens-mcp.exe`
+
+Option B: configure via `config.toml`.
+
 1. In the extension UI, open Codex panel, click gear icon, then choose **MCP settings -> Open config.toml**.
 2. Choose scope:
    - user scope: `~/.codex/config.toml`
@@ -425,7 +446,8 @@ For Windows, set `command` to your `.exe`, for example:
 `C:\\Program Files\\datalens-mcp\\datalens-mcp.exe`
 
 4. Save `config.toml` and restart VS Code if the MCP server is not shown immediately.
-5. Equivalent setup from a VS Code terminal:
+
+Equivalent setup from a VS Code terminal:
 
 ```bash
 codex mcp remove datalens

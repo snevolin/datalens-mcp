@@ -405,6 +405,27 @@ codex mcp add datalens -- <path-to-datalens-mcp>
 
 Настройка MCP в extension использует тот же конфиг Codex, что и CLI.
 
+Вариант A: настройка через UI-форму (**Connect to a custom MCP**).
+
+1. Откройте панель Codex и нажмите иконку шестерёнки.
+2. Откройте **MCP settings -> Open MCP settings**.
+3. На странице **MCP servers** в секции **Custom servers** нажмите **Add server**.
+4. В форме **Connect to a custom MCP** заполните поля:
+   - **Name**: `datalens`
+   - **Transport**: `STDIO`
+   - **Command to launch**: `<path-to-datalens-mcp>`
+   - **Arguments**: оставьте пустым
+   - **Режим передачи кредов**: выберите один из двух вариантов:
+     - **Сохранить значения в форме** (рекомендуется): в `Environment variables` задайте `DATALENS_ORG_ID=<your_org_id>` и `YC_IAM_TOKEN=<your_token>`; поле `Environment variable passthrough` оставьте пустым
+     - **Передавать из окружения VS Code**: `Environment variables` оставьте пустым; в `Environment variable passthrough` добавьте только имена переменных: `DATALENS_ORG_ID` и `YC_IAM_TOKEN` (или `DATALENS_IAM_TOKEN`). Этот режим нужен, когда переменные уже управляются вне формы (например, через shell profile, `direnv`, env в devcontainer/CI, менеджер секретов) и вы не хотите хранить значения токенов в настройках extension
+   - **Working directory**: опционально, значение по умолчанию подходит
+5. Нажмите **Save** и перезапустите VS Code, если MCP-сервер не появился сразу.
+
+Для Windows укажите в **Command to launch** путь к `.exe`, например:
+`C:\\Program Files\\datalens-mcp\\datalens-mcp.exe`
+
+Вариант B: настройка через `config.toml`.
+
 1. В UI extension откройте панель Codex, нажмите иконку шестерёнки и выберите **MCP settings -> Open config.toml**.
 2. Выберите scope:
    - user scope: `~/.codex/config.toml`
@@ -425,7 +446,8 @@ YC_IAM_TOKEN = "<your_token>"
 `C:\\Program Files\\datalens-mcp\\datalens-mcp.exe`
 
 4. Сохраните `config.toml` и перезапустите VS Code, если MCP-сервер не появился сразу.
-5. Эквивалентная настройка через терминал в VS Code:
+
+Эквивалентная настройка через терминал в VS Code:
 
 ```bash
 codex mcp remove datalens
