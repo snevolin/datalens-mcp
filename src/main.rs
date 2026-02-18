@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, env, time::Duration};
+use std::{collections::BTreeMap, env, sync::OnceLock, time::Duration};
 
 use anyhow::{Context, Result};
 use reqwest::{
@@ -25,175 +25,38 @@ type ToolJson = Json<Map<String, Value>>;
 const DEFAULT_BASE_URL: &str = "https://api.datalens.tech";
 const DEFAULT_API_VERSION: &str = "0";
 const DEFAULT_TIMEOUT_SECONDS: u64 = 30;
-const METHOD_CATALOG_SNAPSHOT_DATE: &str = "2026-02-18";
-const METHOD_CATALOG_SOURCE_URL: &str = "https://yandex.cloud/en/docs/datalens/openapi-ref/";
 
-#[derive(Clone, Copy)]
-struct MethodCatalogItem {
-    method: &'static str,
-    tool: &'static str,
-    category: &'static str,
-    experimental: bool,
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MethodRegistry {
+    snapshot_date: String,
+    source_url: String,
+    openapi_version: Option<String>,
+    api_info: Value,
+    methods: Vec<MethodRegistryItem>,
 }
 
-const METHOD_CATALOG: &[MethodCatalogItem] = &[
-    MethodCatalogItem {
-        method: "getConnection",
-        tool: "datalens_get_connection",
-        category: "read",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "createConnection",
-        tool: "datalens_create_connection",
-        category: "write",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "updateConnection",
-        tool: "datalens_update_connection",
-        category: "write",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "deleteConnection",
-        tool: "datalens_delete_connection",
-        category: "write",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "getDashboard",
-        tool: "datalens_get_dashboard",
-        category: "read",
-        experimental: true,
-    },
-    MethodCatalogItem {
-        method: "createDashboard",
-        tool: "datalens_create_dashboard",
-        category: "write",
-        experimental: true,
-    },
-    MethodCatalogItem {
-        method: "updateDashboard",
-        tool: "datalens_update_dashboard",
-        category: "write",
-        experimental: true,
-    },
-    MethodCatalogItem {
-        method: "deleteDashboard",
-        tool: "datalens_delete_dashboard",
-        category: "write",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "getDataset",
-        tool: "datalens_get_dataset",
-        category: "read",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "createDataset",
-        tool: "datalens_create_dataset",
-        category: "write",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "updateDataset",
-        tool: "datalens_update_dataset",
-        category: "write",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "deleteDataset",
-        tool: "datalens_delete_dataset",
-        category: "write",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "validateDataset",
-        tool: "datalens_validate_dataset",
-        category: "write",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "getEntriesRelations",
-        tool: "datalens_get_entries_relations",
-        category: "read",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "getEntries",
-        tool: "datalens_get_entries",
-        category: "read",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "getQLChart",
-        tool: "datalens_get_ql_chart",
-        category: "read",
-        experimental: true,
-    },
-    MethodCatalogItem {
-        method: "deleteQLChart",
-        tool: "datalens_delete_ql_chart",
-        category: "write",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "getWizardChart",
-        tool: "datalens_get_wizard_chart",
-        category: "read",
-        experimental: true,
-    },
-    MethodCatalogItem {
-        method: "deleteWizardChart",
-        tool: "datalens_delete_wizard_chart",
-        category: "write",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "getEditorChart",
-        tool: "datalens_get_editor_chart",
-        category: "read",
-        experimental: true,
-    },
-    MethodCatalogItem {
-        method: "deleteEditorChart",
-        tool: "datalens_delete_editor_chart",
-        category: "write",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "createEditorChart",
-        tool: "datalens_create_editor_chart",
-        category: "write",
-        experimental: true,
-    },
-    MethodCatalogItem {
-        method: "updateEditorChart",
-        tool: "datalens_update_editor_chart",
-        category: "write",
-        experimental: true,
-    },
-    MethodCatalogItem {
-        method: "getEntriesPermissions",
-        tool: "datalens_get_entries_permissions",
-        category: "read",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "getAuditEntriesUpdates",
-        tool: "datalens_get_audit_entries_updates",
-        category: "read",
-        experimental: false,
-    },
-    MethodCatalogItem {
-        method: "listDirectory",
-        tool: "datalens_list_directory",
-        category: "read",
-        experimental: false,
-    },
-];
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MethodRegistryItem {
+    method: String,
+    category: String,
+    experimental: bool,
+    typed_tool: Option<String>,
+    invoke_with: String,
+    summary: Option<String>,
+    description: Option<String>,
+    request_schema: Value,
+}
+
+static METHOD_REGISTRY: OnceLock<MethodRegistry> = OnceLock::new();
+
+fn method_registry() -> &'static MethodRegistry {
+    METHOD_REGISTRY.get_or_init(|| {
+        serde_json::from_str(include_str!("../openapi/datalens-rpc-methods.json"))
+            .expect("embedded DataLens method registry must be valid JSON")
+    })
+}
 
 #[derive(Clone, Debug)]
 struct AppConfig {
@@ -302,30 +165,6 @@ struct GetDashboardArgs {
     branch: Option<String>,
     #[serde(default, alias = "workbookId")]
     workbook_id: Option<String>,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct GetChartArgs {
-    #[serde(alias = "chartId")]
-    chart_id: String,
-    #[serde(default, alias = "workbookId")]
-    workbook_id: Option<String>,
-    #[serde(default, alias = "revId", alias = "rev_id")]
-    rev_id: Option<String>,
-    #[serde(
-        default,
-        alias = "includePermissions",
-        alias = "includePermissionsInfo"
-    )]
-    include_permissions: Option<bool>,
-    #[serde(default, alias = "includeLinks")]
-    include_links: Option<bool>,
-    #[serde(default, alias = "includeFavorite")]
-    include_favorite: Option<bool>,
-    #[serde(default)]
-    branch: Option<String>,
     #[serde(flatten)]
     extra: BTreeMap<String, Value>,
 }
@@ -460,72 +299,14 @@ struct ValidateDatasetArgs {
     extra: BTreeMap<String, Value>,
 }
 
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct GetEntriesRelationsArgs {
-    #[serde(alias = "entryIds")]
-    entry_ids: Vec<String>,
-    #[serde(default, alias = "linkDirection")]
-    link_direction: Option<String>,
-    #[serde(default, alias = "includePermissionsInfo")]
-    include_permissions_info: Option<bool>,
-    #[serde(default)]
-    limit: Option<serde_json::Number>,
-    #[serde(default, alias = "pageToken")]
-    page_token: Option<String>,
-    #[serde(default)]
-    scope: Option<String>,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct DeleteChartArgs {
-    #[serde(alias = "chartId")]
-    chart_id: String,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct CreateEditorChartArgs {
-    entry: Value,
-    #[serde(default)]
-    mode: Option<String>,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct UpdateEditorChartArgs {
-    entry: Value,
-    mode: String,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct EntriesPermissionsArgs {
-    #[serde(alias = "entryIds")]
-    entry_ids: Vec<String>,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct AuditEntriesUpdatesArgs {
-    from: String,
-    #[serde(default)]
-    to: Option<String>,
-    #[serde(default)]
-    limit: Option<serde_json::Number>,
-    #[serde(default, alias = "pageToken")]
-    page_token: Option<String>,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
 #[derive(Debug, Default, Deserialize, schemars::JsonSchema)]
 struct NoArgs {}
+
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+struct GetMethodSchemaArgs {
+    #[serde(alias = "methodName")]
+    method: String,
+}
 
 #[tool_router]
 impl DataLensServer {
@@ -561,27 +342,80 @@ impl DataLensServer {
         &self,
         Parameters(_args): Parameters<NoArgs>,
     ) -> Result<ToolJson, McpError> {
-        let methods = METHOD_CATALOG
+        let registry = method_registry();
+        let methods = registry
+            .methods
             .iter()
             .map(|item| {
+                let mcp_tool = item
+                    .typed_tool
+                    .clone()
+                    .unwrap_or_else(|| "datalens_rpc".to_owned());
                 json!({
                     "method": item.method,
-                    "mcpTool": item.tool,
+                    "mcpTool": mcp_tool,
+                    "typedTool": item.typed_tool,
+                    "invokeWith": item.invoke_with,
                     "category": item.category,
                     "experimental": item.experimental,
+                    "summary": item.summary,
                 })
             })
             .collect::<Vec<_>>();
 
         let response = json!({
-            "snapshotDate": METHOD_CATALOG_SNAPSHOT_DATE,
-            "sourceUrl": METHOD_CATALOG_SOURCE_URL,
+            "snapshotDate": registry.snapshot_date,
+            "sourceUrl": registry.source_url,
+            "openapiVersion": registry.openapi_version,
+            "apiInfo": registry.api_info,
             "totalMethods": methods.len(),
             "genericTool": "datalens_rpc",
             "methods": methods,
         });
         let response = response.as_object().cloned().ok_or_else(|| {
             McpError::internal_error("failed to build method catalog response object", None)
+        })?;
+
+        Ok(Json(response))
+    }
+
+    #[tool(
+        name = "datalens_get_method_schema",
+        description = "Return OpenAPI request schema and invocation hints for a DataLens RPC method."
+    )]
+    async fn datalens_get_method_schema(
+        &self,
+        Parameters(args): Parameters<GetMethodSchemaArgs>,
+    ) -> Result<ToolJson, McpError> {
+        let registry = method_registry();
+        let method = registry
+            .methods
+            .iter()
+            .find(|item| item.method.eq_ignore_ascii_case(&args.method))
+            .ok_or_else(|| {
+                McpError::invalid_params(
+                    format!("Unknown DataLens RPC method: {}", args.method),
+                    Some(json!({
+                        "hint": "Call datalens_list_methods first to discover valid methods."
+                    })),
+                )
+            })?;
+
+        let response = json!({
+            "snapshotDate": registry.snapshot_date,
+            "sourceUrl": registry.source_url,
+            "openapiVersion": registry.openapi_version,
+            "method": method.method,
+            "category": method.category,
+            "experimental": method.experimental,
+            "typedTool": method.typed_tool,
+            "invokeWith": method.invoke_with,
+            "summary": method.summary,
+            "description": method.description,
+            "requestSchema": method.request_schema,
+        });
+        let response = response.as_object().cloned().ok_or_else(|| {
+            McpError::internal_error("failed to build method schema response object", None)
         })?;
 
         Ok(Json(response))
@@ -954,212 +788,6 @@ impl DataLensServer {
         self.call_rpc("validateDataset", Value::Object(payload))
             .await
     }
-
-    #[tool(
-        name = "datalens_get_entries_relations",
-        description = "Call getEntriesRelations. Required: entry_ids."
-    )]
-    async fn datalens_get_entries_relations(
-        &self,
-        Parameters(args): Parameters<GetEntriesRelationsArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert(
-            "entryIds".to_owned(),
-            Value::Array(args.entry_ids.into_iter().map(Value::String).collect()),
-        );
-        if let Some(link_direction) = args.link_direction {
-            payload.insert("linkDirection".to_owned(), Value::String(link_direction));
-        }
-        if let Some(include_permissions_info) = args.include_permissions_info {
-            payload.insert(
-                "includePermissionsInfo".to_owned(),
-                Value::Bool(include_permissions_info),
-            );
-        }
-        if let Some(limit) = args.limit {
-            payload.insert("limit".to_owned(), Value::Number(limit));
-        }
-        if let Some(page_token) = args.page_token {
-            payload.insert("pageToken".to_owned(), Value::String(page_token));
-        }
-        if let Some(scope) = args.scope {
-            payload.insert("scope".to_owned(), Value::String(scope));
-        }
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("getEntriesRelations", Value::Object(payload))
-            .await
-    }
-
-    #[tool(
-        name = "datalens_get_ql_chart",
-        description = "Call getQLChart by chart_id."
-    )]
-    async fn datalens_get_ql_chart(
-        &self,
-        Parameters(args): Parameters<GetChartArgs>,
-    ) -> Result<ToolJson, McpError> {
-        self.call_rpc("getQLChart", Value::Object(build_get_chart_payload(args)))
-            .await
-    }
-
-    #[tool(
-        name = "datalens_delete_ql_chart",
-        description = "Call deleteQLChart by chart_id."
-    )]
-    async fn datalens_delete_ql_chart(
-        &self,
-        Parameters(args): Parameters<DeleteChartArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert("chartId".to_owned(), Value::String(args.chart_id));
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("deleteQLChart", Value::Object(payload)).await
-    }
-
-    #[tool(
-        name = "datalens_get_wizard_chart",
-        description = "Call getWizardChart by chart_id."
-    )]
-    async fn datalens_get_wizard_chart(
-        &self,
-        Parameters(args): Parameters<GetChartArgs>,
-    ) -> Result<ToolJson, McpError> {
-        self.call_rpc(
-            "getWizardChart",
-            Value::Object(build_get_chart_payload(args)),
-        )
-        .await
-    }
-
-    #[tool(
-        name = "datalens_delete_wizard_chart",
-        description = "Call deleteWizardChart by chart_id."
-    )]
-    async fn datalens_delete_wizard_chart(
-        &self,
-        Parameters(args): Parameters<DeleteChartArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert("chartId".to_owned(), Value::String(args.chart_id));
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("deleteWizardChart", Value::Object(payload))
-            .await
-    }
-
-    #[tool(
-        name = "datalens_get_editor_chart",
-        description = "Call getEditorChart by chart_id."
-    )]
-    async fn datalens_get_editor_chart(
-        &self,
-        Parameters(args): Parameters<GetChartArgs>,
-    ) -> Result<ToolJson, McpError> {
-        self.call_rpc(
-            "getEditorChart",
-            Value::Object(build_get_chart_payload(args)),
-        )
-        .await
-    }
-
-    #[tool(
-        name = "datalens_delete_editor_chart",
-        description = "Call deleteEditorChart by chart_id."
-    )]
-    async fn datalens_delete_editor_chart(
-        &self,
-        Parameters(args): Parameters<DeleteChartArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert("chartId".to_owned(), Value::String(args.chart_id));
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("deleteEditorChart", Value::Object(payload))
-            .await
-    }
-
-    #[tool(
-        name = "datalens_create_editor_chart",
-        description = "Call createEditorChart. Required: entry. Optional: mode (`save` or `publish`)."
-    )]
-    async fn datalens_create_editor_chart(
-        &self,
-        Parameters(args): Parameters<CreateEditorChartArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert("entry".to_owned(), args.entry);
-        if let Some(mode) = args.mode {
-            payload.insert("mode".to_owned(), Value::String(mode));
-        }
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("createEditorChart", Value::Object(payload))
-            .await
-    }
-
-    #[tool(
-        name = "datalens_update_editor_chart",
-        description = "Call updateEditorChart. Required: entry, mode (`save` or `publish`)."
-    )]
-    async fn datalens_update_editor_chart(
-        &self,
-        Parameters(args): Parameters<UpdateEditorChartArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert("entry".to_owned(), args.entry);
-        payload.insert("mode".to_owned(), Value::String(args.mode));
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("updateEditorChart", Value::Object(payload))
-            .await
-    }
-
-    #[tool(
-        name = "datalens_get_entries_permissions",
-        description = "Call getEntriesPermissions. Required: entry_ids."
-    )]
-    async fn datalens_get_entries_permissions(
-        &self,
-        Parameters(args): Parameters<EntriesPermissionsArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert(
-            "entryIds".to_owned(),
-            Value::Array(args.entry_ids.into_iter().map(Value::String).collect()),
-        );
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("getEntriesPermissions", Value::Object(payload))
-            .await
-    }
-
-    #[tool(
-        name = "datalens_get_audit_entries_updates",
-        description = "Call getAuditEntriesUpdates. Required: from."
-    )]
-    async fn datalens_get_audit_entries_updates(
-        &self,
-        Parameters(args): Parameters<AuditEntriesUpdatesArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert("from".to_owned(), Value::String(args.from));
-        if let Some(to) = args.to {
-            payload.insert("to".to_owned(), Value::String(to));
-        }
-        if let Some(limit) = args.limit {
-            payload.insert("limit".to_owned(), Value::Number(limit));
-        }
-        if let Some(page_token) = args.page_token {
-            payload.insert("pageToken".to_owned(), Value::String(page_token));
-        }
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("getAuditEntriesUpdates", Value::Object(payload))
-            .await
-    }
 }
 
 #[tool_handler(router = self.tool_router)]
@@ -1167,7 +795,7 @@ impl ServerHandler for DataLensServer {
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
             instructions: Some(
-                "Yandex DataLens MCP server. Configure DATALENS_ORG_ID and YC_IAM_TOKEN (or DATALENS_IAM_TOKEN) before calling tools. Use datalens_list_methods to discover typed tools and API methods."
+                "Yandex DataLens MCP server. Configure DATALENS_ORG_ID and YC_IAM_TOKEN (or DATALENS_IAM_TOKEN) before calling tools. For broad RPC usage: call datalens_list_methods, then datalens_get_method_schema for the chosen method, then call either a typed tool or datalens_rpc."
                     .to_owned(),
             ),
             capabilities: ServerCapabilities::builder().enable_tools().build(),
@@ -1265,34 +893,6 @@ fn extend_with_extra(target: &mut Map<String, Value>, extra: BTreeMap<String, Va
     for (key, value) in extra {
         target.insert(key, value);
     }
-}
-
-fn build_get_chart_payload(args: GetChartArgs) -> Map<String, Value> {
-    let mut payload = Map::new();
-    payload.insert("chartId".to_owned(), Value::String(args.chart_id));
-    if let Some(workbook_id) = args.workbook_id {
-        payload.insert("workbookId".to_owned(), Value::String(workbook_id));
-    }
-    if let Some(rev_id) = args.rev_id {
-        payload.insert("revId".to_owned(), Value::String(rev_id));
-    }
-    if let Some(include_permissions) = args.include_permissions {
-        payload.insert(
-            "includePermissions".to_owned(),
-            Value::Bool(include_permissions),
-        );
-    }
-    if let Some(include_links) = args.include_links {
-        payload.insert("includeLinks".to_owned(), Value::Bool(include_links));
-    }
-    if let Some(include_favorite) = args.include_favorite {
-        payload.insert("includeFavorite".to_owned(), Value::Bool(include_favorite));
-    }
-    if let Some(branch) = args.branch {
-        payload.insert("branch".to_owned(), Value::String(branch));
-    }
-    extend_with_extra(&mut payload, args.extra);
-    payload
 }
 
 fn add_header(headers: &mut HeaderMap, key: &str, value: &str) -> Result<(), McpError> {
@@ -1507,6 +1107,52 @@ mod tests {
             }),
             "method catalog must include createDataset write wrapper"
         );
+    }
+
+    #[tokio::test]
+    async fn datalens_list_methods_includes_full_openapi_snapshot() {
+        let server = test_server("http://127.0.0.1".to_owned());
+
+        let response = server
+            .datalens_list_methods(Parameters(NoArgs::default()))
+            .await
+            .expect("list methods must succeed");
+
+        let total_methods = response
+            .0
+            .get("totalMethods")
+            .and_then(Value::as_u64)
+            .expect("totalMethods must be present and numeric");
+        assert_eq!(
+            total_methods, 60,
+            "embedded method snapshot should expose all RPC methods"
+        );
+    }
+
+    #[tokio::test]
+    async fn datalens_get_method_schema_returns_invoke_hints() {
+        let server = test_server("http://127.0.0.1".to_owned());
+
+        let response = server
+            .datalens_get_method_schema(Parameters(GetMethodSchemaArgs {
+                method: "createDataset".to_owned(),
+            }))
+            .await
+            .expect("get method schema must succeed");
+
+        assert_eq!(
+            response.0.get("method"),
+            Some(&Value::String("createDataset".to_owned()))
+        );
+        assert_eq!(
+            response.0.get("typedTool"),
+            Some(&Value::String("datalens_create_dataset".to_owned()))
+        );
+        assert_eq!(
+            response.0.get("invokeWith"),
+            Some(&Value::String("datalens_create_dataset".to_owned()))
+        );
+        assert!(response.0.get("requestSchema").is_some());
     }
 
     #[tokio::test]
