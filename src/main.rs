@@ -204,44 +204,69 @@ struct GetEntriesArgs {
 }
 
 #[derive(Debug, Deserialize, schemars::JsonSchema)]
+struct GetEntriesRelationsArgs {
+    #[serde(alias = "entryIds")]
+    entry_ids: Vec<String>,
+    #[serde(default, alias = "linkDirection")]
+    link_direction: Option<String>,
+    #[serde(default, alias = "includePermissionsInfo")]
+    include_permissions_info: Option<bool>,
+    #[serde(default)]
+    limit: Option<serde_json::Number>,
+    #[serde(default, alias = "pageToken")]
+    page_token: Option<String>,
+    #[serde(default)]
+    scope: Option<String>,
+    #[serde(flatten)]
+    extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+struct GetEntriesPermissionsArgs {
+    #[serde(alias = "entryIds")]
+    entry_ids: Vec<String>,
+    #[serde(flatten)]
+    extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+struct GetChartArgs {
+    #[serde(alias = "chartId")]
+    chart_id: String,
+    #[serde(default, alias = "workbookId")]
+    workbook_id: Option<String>,
+    #[serde(default, alias = "revId")]
+    rev_id: Option<String>,
+    #[serde(
+        default,
+        alias = "includePermissions",
+        alias = "includePermissionsInfo"
+    )]
+    include_permissions: Option<bool>,
+    #[serde(default, alias = "includeLinks")]
+    include_links: Option<bool>,
+    #[serde(default, alias = "includeFavorite")]
+    include_favorite: Option<bool>,
+    #[serde(default)]
+    branch: Option<String>,
+    #[serde(flatten)]
+    extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
+struct GetWorkbookArgs {
+    #[serde(alias = "workbookId")]
+    workbook_id: String,
+    #[serde(default, alias = "includePermissionsInfo")]
+    include_permissions_info: Option<bool>,
+    #[serde(flatten)]
+    extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Deserialize, schemars::JsonSchema)]
 struct CreateConnectionArgs {
     #[serde(rename = "type")]
     connection_type: String,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct UpdateConnectionArgs {
-    #[serde(alias = "connectionId")]
-    connection_id: String,
-    data: Value,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct DeleteConnectionArgs {
-    #[serde(alias = "connectionId")]
-    connection_id: String,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct UpdateDashboardArgs {
-    entry: Value,
-    mode: String,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct DeleteDashboardArgs {
-    #[serde(alias = "dashboardId")]
-    dashboard_id: String,
-    #[serde(default, alias = "lockToken")]
-    lock_token: Option<String>,
     #[serde(flatten)]
     extra: BTreeMap<String, Value>,
 }
@@ -261,24 +286,6 @@ struct CreateDatasetArgs {
     preview: Option<bool>,
     #[serde(default, alias = "workbookId")]
     workbook_id: Option<String>,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct UpdateDatasetArgs {
-    #[serde(alias = "datasetId")]
-    dataset_id: String,
-    #[serde(default)]
-    data: Option<Value>,
-    #[serde(flatten)]
-    extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-struct DeleteDatasetArgs {
-    #[serde(alias = "datasetId")]
-    dataset_id: String,
     #[serde(flatten)]
     extra: BTreeMap<String, Value>,
 }
@@ -531,6 +538,193 @@ impl DataLensServer {
     }
 
     #[tool(
+        name = "datalens_get_entries_relations",
+        description = "Call getEntriesRelations. Required: entry_ids. Optional: link_direction, include_permissions_info, limit, page_token, scope."
+    )]
+    async fn datalens_get_entries_relations(
+        &self,
+        Parameters(args): Parameters<GetEntriesRelationsArgs>,
+    ) -> Result<ToolJson, McpError> {
+        let mut payload = Map::new();
+        payload.insert(
+            "entryIds".to_owned(),
+            Value::Array(args.entry_ids.into_iter().map(Value::String).collect()),
+        );
+        if let Some(link_direction) = args.link_direction {
+            payload.insert("linkDirection".to_owned(), Value::String(link_direction));
+        }
+        if let Some(include_permissions_info) = args.include_permissions_info {
+            payload.insert(
+                "includePermissionsInfo".to_owned(),
+                Value::Bool(include_permissions_info),
+            );
+        }
+        if let Some(limit) = args.limit {
+            payload.insert("limit".to_owned(), Value::Number(limit));
+        }
+        if let Some(page_token) = args.page_token {
+            payload.insert("pageToken".to_owned(), Value::String(page_token));
+        }
+        if let Some(scope) = args.scope {
+            payload.insert("scope".to_owned(), Value::String(scope));
+        }
+        extend_with_extra(&mut payload, args.extra);
+
+        self.call_rpc("getEntriesRelations", Value::Object(payload))
+            .await
+    }
+
+    #[tool(
+        name = "datalens_get_entries_permissions",
+        description = "Call getEntriesPermissions. Required: entry_ids."
+    )]
+    async fn datalens_get_entries_permissions(
+        &self,
+        Parameters(args): Parameters<GetEntriesPermissionsArgs>,
+    ) -> Result<ToolJson, McpError> {
+        let mut payload = Map::new();
+        payload.insert(
+            "entryIds".to_owned(),
+            Value::Array(args.entry_ids.into_iter().map(Value::String).collect()),
+        );
+        extend_with_extra(&mut payload, args.extra);
+
+        self.call_rpc("getEntriesPermissions", Value::Object(payload))
+            .await
+    }
+
+    #[tool(
+        name = "datalens_get_wizard_chart",
+        description = "Call getWizardChart by chart_id. Optional: workbook_id, rev_id, include_permissions, include_links, include_favorite, branch."
+    )]
+    async fn datalens_get_wizard_chart(
+        &self,
+        Parameters(args): Parameters<GetChartArgs>,
+    ) -> Result<ToolJson, McpError> {
+        let mut payload = Map::new();
+        payload.insert("chartId".to_owned(), Value::String(args.chart_id));
+        if let Some(workbook_id) = args.workbook_id {
+            payload.insert("workbookId".to_owned(), Value::String(workbook_id));
+        }
+        if let Some(rev_id) = args.rev_id {
+            payload.insert("revId".to_owned(), Value::String(rev_id));
+        }
+        if let Some(include_permissions) = args.include_permissions {
+            payload.insert(
+                "includePermissions".to_owned(),
+                Value::Bool(include_permissions),
+            );
+        }
+        if let Some(include_links) = args.include_links {
+            payload.insert("includeLinks".to_owned(), Value::Bool(include_links));
+        }
+        if let Some(include_favorite) = args.include_favorite {
+            payload.insert("includeFavorite".to_owned(), Value::Bool(include_favorite));
+        }
+        if let Some(branch) = args.branch {
+            payload.insert("branch".to_owned(), Value::String(branch));
+        }
+        extend_with_extra(&mut payload, args.extra);
+
+        self.call_rpc("getWizardChart", Value::Object(payload))
+            .await
+    }
+
+    #[tool(
+        name = "datalens_get_workbook",
+        description = "Call getWorkbook by workbook_id. Optional: include_permissions_info."
+    )]
+    async fn datalens_get_workbook(
+        &self,
+        Parameters(args): Parameters<GetWorkbookArgs>,
+    ) -> Result<ToolJson, McpError> {
+        let mut payload = Map::new();
+        payload.insert("workbookId".to_owned(), Value::String(args.workbook_id));
+        if let Some(include_permissions_info) = args.include_permissions_info {
+            payload.insert(
+                "includePermissionsInfo".to_owned(),
+                Value::Bool(include_permissions_info),
+            );
+        }
+        extend_with_extra(&mut payload, args.extra);
+
+        self.call_rpc("getWorkbook", Value::Object(payload)).await
+    }
+
+    #[tool(
+        name = "datalens_get_editor_chart",
+        description = "Call getEditorChart by chart_id. Optional: workbook_id, rev_id, include_permissions, include_links, include_favorite, branch."
+    )]
+    async fn datalens_get_editor_chart(
+        &self,
+        Parameters(args): Parameters<GetChartArgs>,
+    ) -> Result<ToolJson, McpError> {
+        let mut payload = Map::new();
+        payload.insert("chartId".to_owned(), Value::String(args.chart_id));
+        if let Some(workbook_id) = args.workbook_id {
+            payload.insert("workbookId".to_owned(), Value::String(workbook_id));
+        }
+        if let Some(rev_id) = args.rev_id {
+            payload.insert("revId".to_owned(), Value::String(rev_id));
+        }
+        if let Some(include_permissions) = args.include_permissions {
+            payload.insert(
+                "includePermissions".to_owned(),
+                Value::Bool(include_permissions),
+            );
+        }
+        if let Some(include_links) = args.include_links {
+            payload.insert("includeLinks".to_owned(), Value::Bool(include_links));
+        }
+        if let Some(include_favorite) = args.include_favorite {
+            payload.insert("includeFavorite".to_owned(), Value::Bool(include_favorite));
+        }
+        if let Some(branch) = args.branch {
+            payload.insert("branch".to_owned(), Value::String(branch));
+        }
+        extend_with_extra(&mut payload, args.extra);
+
+        self.call_rpc("getEditorChart", Value::Object(payload))
+            .await
+    }
+
+    #[tool(
+        name = "datalens_get_ql_chart",
+        description = "Call getQLChart by chart_id. Optional: workbook_id, rev_id, include_permissions, include_links, include_favorite, branch."
+    )]
+    async fn datalens_get_ql_chart(
+        &self,
+        Parameters(args): Parameters<GetChartArgs>,
+    ) -> Result<ToolJson, McpError> {
+        let mut payload = Map::new();
+        payload.insert("chartId".to_owned(), Value::String(args.chart_id));
+        if let Some(workbook_id) = args.workbook_id {
+            payload.insert("workbookId".to_owned(), Value::String(workbook_id));
+        }
+        if let Some(rev_id) = args.rev_id {
+            payload.insert("revId".to_owned(), Value::String(rev_id));
+        }
+        if let Some(include_permissions) = args.include_permissions {
+            payload.insert(
+                "includePermissions".to_owned(),
+                Value::Bool(include_permissions),
+            );
+        }
+        if let Some(include_links) = args.include_links {
+            payload.insert("includeLinks".to_owned(), Value::Bool(include_links));
+        }
+        if let Some(include_favorite) = args.include_favorite {
+            payload.insert("includeFavorite".to_owned(), Value::Bool(include_favorite));
+        }
+        if let Some(branch) = args.branch {
+            payload.insert("branch".to_owned(), Value::String(branch));
+        }
+        extend_with_extra(&mut payload, args.extra);
+
+        self.call_rpc("getQLChart", Value::Object(payload)).await
+    }
+
+    #[tool(
         name = "datalens_get_dataset",
         description = "Call getDataset by dataset_id. Optional: workbook_id, rev_id and other request fields."
     )]
@@ -633,78 +827,6 @@ impl DataLensServer {
     }
 
     #[tool(
-        name = "datalens_update_connection",
-        description = "Call updateConnection. Required: connection_id, data."
-    )]
-    async fn datalens_update_connection(
-        &self,
-        Parameters(args): Parameters<UpdateConnectionArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert("connectionId".to_owned(), Value::String(args.connection_id));
-        payload.insert("data".to_owned(), normalize_json_value(args.data, "data")?);
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("updateConnection", Value::Object(payload))
-            .await
-    }
-
-    #[tool(
-        name = "datalens_delete_connection",
-        description = "Call deleteConnection by connection_id."
-    )]
-    async fn datalens_delete_connection(
-        &self,
-        Parameters(args): Parameters<DeleteConnectionArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert("connectionId".to_owned(), Value::String(args.connection_id));
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("deleteConnection", Value::Object(payload))
-            .await
-    }
-
-    #[tool(
-        name = "datalens_update_dashboard",
-        description = "Call updateDashboard. Required: entry, mode (`save` or `publish`)."
-    )]
-    async fn datalens_update_dashboard(
-        &self,
-        Parameters(args): Parameters<UpdateDashboardArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert(
-            "entry".to_owned(),
-            normalize_json_value(args.entry, "entry")?,
-        );
-        payload.insert("mode".to_owned(), Value::String(args.mode));
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("updateDashboard", Value::Object(payload))
-            .await
-    }
-
-    #[tool(
-        name = "datalens_delete_dashboard",
-        description = "Call deleteDashboard by dashboard_id. Optional: lock_token."
-    )]
-    async fn datalens_delete_dashboard(
-        &self,
-        Parameters(args): Parameters<DeleteDashboardArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert("dashboardId".to_owned(), Value::String(args.dashboard_id));
-        if let Some(lock_token) = args.lock_token {
-            payload.insert("lockToken".to_owned(), Value::String(lock_token));
-        }
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("deleteDashboard", Value::Object(payload))
-            .await
-    }
-
-    #[tool(
         name = "datalens_create_dataset",
         description = "Call createDataset. Required: dataset. For workbook-scoped creation, pass workbook_id."
     )]
@@ -744,38 +866,6 @@ impl DataLensServer {
         extend_with_extra(&mut payload, args.extra);
 
         self.call_rpc("createDataset", Value::Object(payload)).await
-    }
-
-    #[tool(
-        name = "datalens_update_dataset",
-        description = "Call updateDataset by dataset_id. Optional: data."
-    )]
-    async fn datalens_update_dataset(
-        &self,
-        Parameters(args): Parameters<UpdateDatasetArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert("datasetId".to_owned(), Value::String(args.dataset_id));
-        let data = args.data.unwrap_or_else(|| Value::Object(Map::new()));
-        payload.insert("data".to_owned(), normalize_json_value(data, "data")?);
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("updateDataset", Value::Object(payload)).await
-    }
-
-    #[tool(
-        name = "datalens_delete_dataset",
-        description = "Call deleteDataset by dataset_id."
-    )]
-    async fn datalens_delete_dataset(
-        &self,
-        Parameters(args): Parameters<DeleteDatasetArgs>,
-    ) -> Result<ToolJson, McpError> {
-        let mut payload = Map::new();
-        payload.insert("datasetId".to_owned(), Value::String(args.dataset_id));
-        extend_with_extra(&mut payload, args.extra);
-
-        self.call_rpc("deleteDataset", Value::Object(payload)).await
     }
 
     #[tool(
@@ -1356,14 +1446,18 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn datalens_update_dataset_defaults_data_to_empty_object() {
+    async fn datalens_get_entries_relations_calls_get_entries_relations_rpc_method() {
         let mock_server = MockServer::start().await;
 
         Mock::given(method("POST"))
-            .and(path("/rpc/updateDataset"))
+            .and(path("/rpc/getEntriesRelations"))
             .and(body_json(json!({
-                "datasetId": "ds-1",
-                "data": {}
+                "entryIds": ["entry-1", "entry-2"],
+                "linkDirection": "from",
+                "includePermissionsInfo": true,
+                "limit": 50,
+                "pageToken": "next-page",
+                "scope": "dash"
             })))
             .respond_with(ResponseTemplate::new(200).set_body_json(json!({"ok": true})))
             .mount(&mock_server)
@@ -1371,13 +1465,106 @@ mod tests {
 
         let server = test_server(mock_server.uri());
         let result = server
-            .datalens_update_dataset(Parameters(UpdateDatasetArgs {
-                dataset_id: "ds-1".to_owned(),
-                data: None,
+            .datalens_get_entries_relations(Parameters(GetEntriesRelationsArgs {
+                entry_ids: vec!["entry-1".to_owned(), "entry-2".to_owned()],
+                link_direction: Some("from".to_owned()),
+                include_permissions_info: Some(true),
+                limit: Some(serde_json::Number::from(50)),
+                page_token: Some("next-page".to_owned()),
+                scope: Some("dash".to_owned()),
                 extra: BTreeMap::new(),
             }))
             .await
-            .expect("missing data must default to {}");
+            .expect("tool call must succeed");
+
+        assert_eq!(Value::Object(result.0), json!({"ok": true}));
+    }
+
+    #[tokio::test]
+    async fn datalens_get_entries_permissions_calls_get_entries_permissions_rpc_method() {
+        let mock_server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/rpc/getEntriesPermissions"))
+            .and(body_json(json!({
+                "entryIds": ["entry-1", "entry-2"]
+            })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"ok": true})))
+            .mount(&mock_server)
+            .await;
+
+        let server = test_server(mock_server.uri());
+        let result = server
+            .datalens_get_entries_permissions(Parameters(GetEntriesPermissionsArgs {
+                entry_ids: vec!["entry-1".to_owned(), "entry-2".to_owned()],
+                extra: BTreeMap::new(),
+            }))
+            .await
+            .expect("tool call must succeed");
+
+        assert_eq!(Value::Object(result.0), json!({"ok": true}));
+    }
+
+    #[tokio::test]
+    async fn datalens_get_ql_chart_calls_get_ql_chart_rpc_method() {
+        let mock_server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/rpc/getQLChart"))
+            .and(body_json(json!({
+                "chartId": "chart-1",
+                "workbookId": "wb-1",
+                "revId": "rev-1",
+                "includePermissions": true,
+                "includeLinks": true,
+                "includeFavorite": false,
+                "branch": "saved"
+            })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"ok": true})))
+            .mount(&mock_server)
+            .await;
+
+        let server = test_server(mock_server.uri());
+        let result = server
+            .datalens_get_ql_chart(Parameters(GetChartArgs {
+                chart_id: "chart-1".to_owned(),
+                workbook_id: Some("wb-1".to_owned()),
+                rev_id: Some("rev-1".to_owned()),
+                include_permissions: Some(true),
+                include_links: Some(true),
+                include_favorite: Some(false),
+                branch: Some("saved".to_owned()),
+                extra: BTreeMap::new(),
+            }))
+            .await
+            .expect("tool call must succeed");
+
+        assert_eq!(Value::Object(result.0), json!({"ok": true}));
+    }
+
+    #[tokio::test]
+    async fn datalens_get_workbook_calls_get_workbook_rpc_method() {
+        let mock_server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/rpc/getWorkbook"))
+            .and(body_json(json!({
+                "workbookId": "wb-1",
+                "includePermissionsInfo": true
+            })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"ok": true})))
+            .mount(&mock_server)
+            .await;
+
+        let server = test_server(mock_server.uri());
+        let result = server
+            .datalens_get_workbook(Parameters(GetWorkbookArgs {
+                workbook_id: "wb-1".to_owned(),
+                include_permissions_info: Some(true),
+                extra: BTreeMap::new(),
+            }))
+            .await
+            .expect("tool call must succeed");
 
         assert_eq!(Value::Object(result.0), json!({"ok": true}));
     }

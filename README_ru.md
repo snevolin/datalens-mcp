@@ -15,13 +15,15 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
    - [macOS (Apple Silicon, aarch64 tar.gz)](#install-macos)
    - [Windows (MSI или ZIP)](#install-windows)
    - [Сборка из исходников](#install-build-from-source)
-2. Подключите его к тем агентам, которыми пользуетесь:
+2. Получите API-ключ (ID организации + IAM-токен):
+   - [Получение доступа к API](#api-credentials)
+3. Подключите MCP-сервер к тем агентам, которыми пользуетесь:
    - [Codex CLI](#connect-codex-cli)
    - [VS Code Codex Extension](#connect-codex-vscode)
    - [Cursor](#connect-cursor)
    - [Claude Code (CLI)](#connect-claude-code)
    - [Claude Desktop](#connect-claude-desktop)
-3. Выполните первые запросы:
+4. Выполните первые запросы:
    - [Примеры использования](#usage-examples)
 
 ## Дисклеймер
@@ -39,17 +41,17 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
 - Типизированные обёртки (основные high-frequency методы):
   - `datalens_get_connection` -> `getConnection`
   - `datalens_create_connection` -> `createConnection`
-  - `datalens_update_connection` -> `updateConnection`
-  - `datalens_delete_connection` -> `deleteConnection`
   - `datalens_get_dashboard` -> `getDashboard`
-  - `datalens_update_dashboard` -> `updateDashboard`
-  - `datalens_delete_dashboard` -> `deleteDashboard`
   - `datalens_get_dataset` -> `getDataset`
   - `datalens_create_dataset` -> `createDataset`
-  - `datalens_update_dataset` -> `updateDataset`
-  - `datalens_delete_dataset` -> `deleteDataset`
   - `datalens_validate_dataset` -> `validateDataset`
   - `datalens_get_entries` -> `getEntries`
+  - `datalens_get_entries_relations` -> `getEntriesRelations`
+  - `datalens_get_entries_permissions` -> `getEntriesPermissions`
+  - `datalens_get_wizard_chart` -> `getWizardChart`
+  - `datalens_get_workbook` -> `getWorkbook`
+  - `datalens_get_editor_chart` -> `getEditorChart`
+  - `datalens_get_ql_chart` -> `getQLChart`
   - `datalens_list_directory` -> `listDirectory`
 
 ## Покрытие API
@@ -76,6 +78,7 @@ Rust MCP-сервер для Public API Yandex DataLens (`https://api.datalens.t
 - ID организации DataLens
 - IAM-токен Yandex Cloud (или OAuth-токен, который принимает DataLens)
 
+<a id="api-credentials"></a>
 ## Получение доступа к API
 
 Public API DataLens требует auth-заголовки и ID организации.

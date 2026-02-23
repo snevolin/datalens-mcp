@@ -15,13 +15,15 @@ Where to start with `datalens-mcp`:
    - [macOS (Apple Silicon, aarch64 tar.gz)](#install-macos)
    - [Windows (MSI or ZIP)](#install-windows)
    - [Build from source](#install-build-from-source)
-2. Connect it to the agents you use:
+2. Get API credentials (organization ID + IAM token):
+   - [Get API Credentials](#api-credentials)
+3. Connect the MCP server to the agents you use:
    - [Codex CLI](#connect-codex-cli)
    - [VS Code Codex Extension](#connect-codex-vscode)
    - [Cursor](#connect-cursor)
    - [Claude Code (CLI)](#connect-claude-code)
    - [Claude Desktop](#connect-claude-desktop)
-3. Run first requests:
+4. Run first requests:
    - [Usage examples](#usage-examples)
 
 ## Disclaimer
@@ -39,17 +41,17 @@ Where to start with `datalens-mcp`:
 - Typed wrappers (core high-frequency methods):
   - `datalens_get_connection` -> `getConnection`
   - `datalens_create_connection` -> `createConnection`
-  - `datalens_update_connection` -> `updateConnection`
-  - `datalens_delete_connection` -> `deleteConnection`
   - `datalens_get_dashboard` -> `getDashboard`
-  - `datalens_update_dashboard` -> `updateDashboard`
-  - `datalens_delete_dashboard` -> `deleteDashboard`
   - `datalens_get_dataset` -> `getDataset`
   - `datalens_create_dataset` -> `createDataset`
-  - `datalens_update_dataset` -> `updateDataset`
-  - `datalens_delete_dataset` -> `deleteDataset`
   - `datalens_validate_dataset` -> `validateDataset`
   - `datalens_get_entries` -> `getEntries`
+  - `datalens_get_entries_relations` -> `getEntriesRelations`
+  - `datalens_get_entries_permissions` -> `getEntriesPermissions`
+  - `datalens_get_wizard_chart` -> `getWizardChart`
+  - `datalens_get_workbook` -> `getWorkbook`
+  - `datalens_get_editor_chart` -> `getEditorChart`
+  - `datalens_get_ql_chart` -> `getQLChart`
   - `datalens_list_directory` -> `listDirectory`
 
 ## API Coverage
@@ -76,6 +78,7 @@ Reference docs used for this snapshot include DataLens API pages updated up to *
 - DataLens organization ID
 - Yandex Cloud IAM token (or OAuth token accepted by DataLens)
 
+<a id="api-credentials"></a>
 ## Get API Credentials
 
 DataLens Public API requires authentication headers and an organization ID.
